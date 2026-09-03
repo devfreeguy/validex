@@ -1,0 +1,42 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Env
+.env
+.env.local
+.env.*.local
+!.env.example
+
+# Build output
+dist/
+build/
+.next/
+out/
+
+# Prisma - the generated client is rebuilt by `prisma generate` (wired as a
+# postinstall script); migration.sql history under prisma/migrations is
+# intentionally NOT ignored - it must stay in version control.
+generated/
+src/generated/
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/*
+!.vscode/extensions.json
+.idea/
+
+# Testing / coverage
+coverage/
+
+# Misc
+*.tsbuildinfo
+.turbo/

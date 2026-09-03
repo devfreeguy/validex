@@ -1,0 +1,21 @@
+{
+  "name": "validex",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Validex - startup health and validation API for the Algorand Global x402 Challenge",
+  "scripts": {
+    "dev": "pnpm --filter api dev",
+    "dev:web": "pnpm --filter web dev",
+    "build": "pnpm -r build",
+    "lint": "pnpm -r lint",
+    "format": "prettier --write \"**/*.{ts,tsx,md}\""
+  },
+  "devDependencies": {
+    "prettier": "^3.3.3",
+    "typescript": "^5.6.3"
+  },
+  "packageManager": "pnpm@11.15.1",
+  "engines": {
+    "node": ">=20"
+  }
+}

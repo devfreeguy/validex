@@ -1,0 +1,90 @@
+generator client {
+  provider            = "prisma-client"
+  output              = "../src/generated/prisma"
+  moduleFormat        = "cjs"
+  importFileExtension = "js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum AnalysisTier {
+  quick
+  full
+}
+
+enum AnalysisStatus {
+  pending
+  running
+  completed
+  partial
+  failed
+}
+
+enum ValidatorCategory {
+  website
+  engineering
+  security
+  trust
+  growth
+}
+
+enum ValidatorResultStatus {
+  success
+  unavailable
+  error
+}
+
+model Analysis {
+  id               String         @id @default(cuid())
+  analysisId       String         @unique
+  tier             AnalysisTier
+  status           AnalysisStatus @default(pending)
+  target           String
+  domain           String?
+  canonicalUrl     String?
+  companyName      String?
+  refresh          Boolean        @default(false)
+  sections         String[]
+  score            Float?
+  confidence       Float?
+  grade            String?
+  algorithmVersion String
+  cached           Boolean        @default(false)
+  result           Json?
+  errorMessage     String?
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+  completedAt      DateTime?
+
+  validatorResults ValidatorResult[]
+
+  @@index([analysisId])
+  @@index([domain, status])
+  @@map("analyses")
+}
+
+model ValidatorResult {
+  id           String                 @id @default(cuid())
+  analysisId   String
+  validatorId  String
+  category     ValidatorCategory
+  status       ValidatorResultStatus
+  score        Float?
+  maxScore     Float
+  weight       Float
+  confidence   Float?
+  evidence     Json?
+  source       Json?
+  metadata     Json?
+  ttl          Int?
+  cachedUntil  DateTime?
+  createdAt    DateTime               @default(now())
+
+  analysis     Analysis               @relation(fields: [analysisId], references: [analysisId])
+
+  @@index([analysisId])
+  @@index([validatorId])
+  @@map("validator_results")
+}
