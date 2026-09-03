@@ -44,8 +44,11 @@ export const envValidationSchema = Joi.object({
   GROQ_API_KEY: Joi.string().required(),
   GROQ_MODEL: Joi.string().default('openai/gpt-oss-120b'),
 
-  // Database
+  // Database (Neon)
+  // DATABASE_URL: pooled/PgBouncer connection, used by Prisma Client at runtime.
+  // DATABASE_DIRECT_URL: direct connection, used by Prisma Migrate to bypass PgBouncer.
   DATABASE_URL: Joi.string().required(),
+  DATABASE_DIRECT_URL: Joi.string().required(),
 
   // Redis
   REDIS_URL: Joi.string().required(),

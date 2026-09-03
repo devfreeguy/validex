@@ -3,6 +3,7 @@ import { CacheModule as NestCacheModule } from '@nestjs/cache-manager';
 import { ConfigService } from '@nestjs/config';
 import { redisStore } from 'cache-manager-redis-yet';
 import { CacheService } from './cache.service';
+import { parseRedisUrl } from '@/config/redis-connection.util';
 
 @Global()
 @Module({
@@ -10,11 +11,23 @@ import { CacheService } from './cache.service';
     NestCacheModule.registerAsync({
       isGlobal: true,
       inject: [ConfigService],
-      useFactory: async (configService: ConfigService) => ({
-        store: await redisStore({
-          url: configService.get<string>('REDIS_URL'),
-        }),
-      }),
+      useFactory: async (configService: ConfigService) => {
+        const { host, port, username, password, tls } = parseRedisUrl(
+          configService.get<string>('REDIS_URL', { infer: true }) as string,
+        );
+
+        return {
+          store: await redisStore({
+            username,
+            password,
+            socket: {
+              host,
+              port,
+              ...(tls ? { tls: true as const } : {}),
+            },
+          }),
+        };
+      },
     }),
   ],
   providers: [CacheService],

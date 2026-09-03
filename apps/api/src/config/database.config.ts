@@ -2,6 +2,7 @@ import { registerAs } from '@nestjs/config';
 
 export interface DatabaseConfig {
   url: string;
+  directUrl: string;
 }
 
 export interface RedisConfig {
@@ -10,6 +11,7 @@ export interface RedisConfig {
 
 export const databaseConfig = registerAs('database', (): DatabaseConfig => ({
   url: process.env.DATABASE_URL ?? '',
+  directUrl: process.env.DATABASE_DIRECT_URL ?? '',
 }));
 
 export const redisConfig = registerAs('redis', (): RedisConfig => ({
