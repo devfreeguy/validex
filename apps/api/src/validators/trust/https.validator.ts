@@ -53,6 +53,7 @@ export class HTTPSValidator extends BaseValidator {
             url: result.finalUrl,
           },
         ],
+        source: { name: 'Website', url: entity.canonicalUrl },
       };
     } catch (err) {
       return this.error(entity, err);

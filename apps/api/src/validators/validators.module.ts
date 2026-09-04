@@ -3,6 +3,8 @@ import { CrawlerModule } from '@/providers/crawler/crawler.module';
 import { DnsModule } from '@/providers/dns/dns.module';
 import { TlsModule } from '@/providers/tls/tls.module';
 import { RdapModule } from '@/providers/rdap/rdap.module';
+import { GithubModule } from '@/providers/github/github.module';
+import { OsvModule } from '@/providers/osv/osv.module';
 import { BaseValidator } from './base.validator';
 import {
   VALIDATORS_TOKEN,
@@ -29,6 +31,15 @@ import { TrustValidatorsModule } from './trust/trust.module';
 import { HTTPSValidator } from './trust/https.validator';
 import { MXValidator } from './trust/mx.validator';
 import { DomainAgeValidator } from './trust/domain-age.validator';
+import { EngineeringValidatorsModule } from './engineering/engineering.module';
+import { GitHubPresenceValidator } from './engineering/github-presence.validator';
+import { RepositoryAgeValidator } from './engineering/repository-age.validator';
+import { GitHubActivityValidator } from './engineering/github-activity.validator';
+import { ContributorValidator } from './engineering/contributors.validator';
+import { ReleaseFrequencyValidator } from './engineering/release-frequency.validator';
+import { IssueActivityValidator } from './engineering/issue-activity.validator';
+import { PullRequestActivityValidator } from './engineering/pr-activity.validator';
+import { RepositoryPopularityValidator } from './engineering/repository-popularity.validator';
 
 const VALIDATOR_CLASSES = [
   WebsiteReachabilityValidator,
@@ -49,6 +60,14 @@ const VALIDATOR_CLASSES = [
   HTTPSValidator,
   MXValidator,
   DomainAgeValidator,
+  GitHubPresenceValidator,
+  RepositoryAgeValidator,
+  GitHubActivityValidator,
+  ContributorValidator,
+  ReleaseFrequencyValidator,
+  IssueActivityValidator,
+  PullRequestActivityValidator,
+  RepositoryPopularityValidator,
 ] as const;
 
 /**
@@ -62,9 +81,12 @@ const VALIDATOR_CLASSES = [
     DnsModule,
     TlsModule,
     RdapModule,
+    GithubModule,
+    OsvModule,
     WebsiteValidatorsModule,
     SecurityValidatorsModule,
     TrustValidatorsModule,
+    EngineeringValidatorsModule,
   ],
   providers: [
     ValidatorRegistry,

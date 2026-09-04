@@ -51,6 +51,7 @@ export class WebsiteReachabilityValidator extends BaseValidator {
             url: entity.canonicalUrl,
           },
         ],
+        source: { name: 'Website', url: entity.canonicalUrl },
       };
     } catch (err) {
       return this.error(entity, err);

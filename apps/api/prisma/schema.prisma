@@ -28,6 +28,7 @@ enum ValidatorCategory {
   security
   trust
   growth
+  product
 }
 
 enum ValidatorResultStatus {

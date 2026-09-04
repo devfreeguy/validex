@@ -58,6 +58,7 @@ export class BlogValidator extends BaseValidator {
         evidence: [
           { statement, source: this.validatorId, url: result.url ?? undefined },
         ],
+        source: { name: 'Website', url: result.url ?? entity.canonicalUrl },
       };
     } catch (err) {
       return this.error(entity, err);

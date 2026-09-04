@@ -1,7 +1,8 @@
 import { Module } from '@nestjs/common';
+import { AiService } from './ai.service';
 
-/**
- * Stub - Groq-backed AI assistance module. No logic yet.
- */
-@Module({})
+@Module({
+  providers: [AiService],
+  exports: [AiService],
+})
 export class AiModule {}

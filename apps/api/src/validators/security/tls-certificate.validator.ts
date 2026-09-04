@@ -64,6 +64,7 @@ export class TLSCertificateValidator extends BaseValidator {
             source: this.validatorId,
           },
         ],
+        source: { name: 'TLS Certificate', url: `https://${entity.domain}` },
       };
     } catch (err) {
       return this.error(entity, err);

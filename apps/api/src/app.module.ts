@@ -14,6 +14,9 @@ import { DnsModule } from '@/providers/dns/dns.module';
 import { TlsModule } from '@/providers/tls/tls.module';
 import { RdapModule } from '@/providers/rdap/rdap.module';
 import { CrawlerModule } from '@/providers/crawler/crawler.module';
+import { GithubModule } from '@/providers/github/github.module';
+import { OsvModule } from '@/providers/osv/osv.module';
+import { EngineModule } from '@/engine/engine.module';
 
 @Module({
   imports: [
@@ -49,6 +52,9 @@ import { CrawlerModule } from '@/providers/crawler/crawler.module';
     TlsModule,
     RdapModule,
     CrawlerModule,
+    GithubModule,
+    OsvModule,
+    EngineModule,
     EntityModule,
     ValidatorsModule,
     ValidateModule,

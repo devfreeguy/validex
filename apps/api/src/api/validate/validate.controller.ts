@@ -21,7 +21,6 @@ export class ValidateController {
 
   @Get(':analysisId')
   async getAnalysis(@Param('analysisId') analysisId: string) {
-    const data = await this.validateService.getAnalysis(analysisId);
-    return { success: true, data };
+    return this.validateService.getAnalysis(analysisId);
   }
 }

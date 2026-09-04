@@ -103,6 +103,7 @@ export class CareersValidator extends BaseValidator {
       evidence: [
         { statement, source: this.validatorId, url: url ?? undefined },
       ],
+      source: { name: 'Website', url: url ?? undefined },
     };
   }
 }

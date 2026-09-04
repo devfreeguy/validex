@@ -58,6 +58,7 @@ export class MXValidator extends BaseValidator {
             source: this.validatorId,
           },
         ],
+        source: { name: 'DNS MX Record' },
       };
     } catch (err) {
       return this.error(entity, err);

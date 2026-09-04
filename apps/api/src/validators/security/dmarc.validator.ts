@@ -49,6 +49,7 @@ export class DMARCValidator extends BaseValidator {
               source: this.validatorId,
             },
           ],
+          source: { name: 'DNS TXT Record' },
         };
       }
 
@@ -77,6 +78,7 @@ export class DMARCValidator extends BaseValidator {
         weight: this.weight,
         confidence: 97,
         evidence: [{ statement: dmarcRecord, source: this.validatorId }],
+        source: { name: 'DNS TXT Record' },
       };
     } catch (err) {
       return this.error(entity, err);

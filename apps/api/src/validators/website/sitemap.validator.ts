@@ -68,6 +68,7 @@ export class SitemapValidator extends BaseValidator {
             source: this.validatorId,
           },
         ],
+        source: { name: 'Website', url: entity.canonicalUrl },
       };
     } catch (err) {
       return this.error(entity, err);

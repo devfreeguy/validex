@@ -70,6 +70,7 @@ export class DomainAgeValidator extends BaseValidator {
             source: this.validatorId,
           },
         ],
+        source: { name: 'RDAP', url: 'https://rdap.org' },
       };
     } catch (err) {
       return this.error(entity, err);

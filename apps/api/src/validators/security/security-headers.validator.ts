@@ -68,6 +68,7 @@ export class SecurityHeadersValidator extends BaseValidator {
             url: entity.canonicalUrl,
           },
         ],
+        source: { name: 'HTTP Response Headers', url: entity.canonicalUrl },
       };
     } catch (err) {
       return this.error(entity, err);
