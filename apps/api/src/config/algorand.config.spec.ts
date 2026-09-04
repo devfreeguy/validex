@@ -22,8 +22,11 @@ describe('AlgorandConfigService', () => {
 
     expect(service.network).toBe('mainnet');
     expect(service.walletAddress).toBe('MAINNET_WALLET');
-    expect(service.usdcAssetId).toBe(31566704);
+    expect(service.usdcAssetId).toBe('31566704');
     expect(service.facilitatorUrl).toBe('https://mainnet.facilitator');
+    expect(service.caip2Network).toBe(
+      'algorand:wGHE2Pwdvd7S12BL5FaOP20EGYesN73ktiC1qzkkit8=',
+    );
   });
 
   it('resolves testnet vars when NETWORK=testnet', () => {
@@ -39,7 +42,10 @@ describe('AlgorandConfigService', () => {
 
     expect(service.network).toBe('testnet');
     expect(service.walletAddress).toBe('TESTNET_WALLET');
-    expect(service.usdcAssetId).toBe(10458941);
+    expect(service.usdcAssetId).toBe('10458941');
     expect(service.facilitatorUrl).toBe('https://testnet.facilitator');
+    expect(service.caip2Network).toBe(
+      'algorand:SGO1GKSzyE7IEPItTxCByw9x8FmnrCDexi9/cOUJOiI=',
+    );
   });
 });

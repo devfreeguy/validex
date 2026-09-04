@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import axios, { type AxiosHeaders, type RawAxiosResponseHeaders } from 'axios';
+import axios, { AxiosHeaders, type RawAxiosResponseHeaders } from 'axios';
 import { CacheService } from '@/cache/cache.service';
 import {
   GithubContributor,
@@ -17,7 +17,8 @@ const CACHE_TTL_SECONDS = 6 * 60 * 60;
 const RATE_LIMIT_WARN_THRESHOLD = 10;
 const COMMIT_ACTIVITY_RETRY_DELAY_MS = 3_000;
 
-type ResponseHeaders = RawAxiosResponseHeaders | AxiosHeaders;
+type ResponseHeaders =
+  RawAxiosResponseHeaders | InstanceType<typeof AxiosHeaders>;
 
 interface RawGithubRepo {
   id: number;

@@ -17,6 +17,8 @@ import { CrawlerModule } from '@/providers/crawler/crawler.module';
 import { GithubModule } from '@/providers/github/github.module';
 import { OsvModule } from '@/providers/osv/osv.module';
 import { EngineModule } from '@/engine/engine.module';
+import { X402Module } from '@/x402/x402.module';
+import { HealthModule } from '@/health/health.module';
 
 @Module({
   imports: [
@@ -55,6 +57,8 @@ import { EngineModule } from '@/engine/engine.module';
     GithubModule,
     OsvModule,
     EngineModule,
+    X402Module,
+    HealthModule,
     EntityModule,
     ValidatorsModule,
     ValidateModule,

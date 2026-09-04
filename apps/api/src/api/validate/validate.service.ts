@@ -1,6 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { createId } from '@paralleldrive/cuid2';
 import {
   AnalysisStatus,
   AnalysisTier,
@@ -22,6 +21,10 @@ import { AiService } from '@/ai/ai.service';
 import { CacheService } from '@/cache/cache.service';
 import { QuickValidateDto } from './dto/quick-validate.dto';
 import { FullValidateDto } from './dto/full-validate.dto';
+
+// @paralleldrive/cuid2 is ESM-only; this CJS project loads it via a single
+// cached dynamic import rather than a static require().
+const cuid2 = import('@paralleldrive/cuid2');
 
 interface GetAnalysisResponse {
   success: boolean;
@@ -111,6 +114,7 @@ export class ValidateService {
     tier: AnalysisTier,
     validators: BaseValidator[],
   ): Promise<AnalysisReport> {
+    const { createId } = await cuid2;
     const analysisId = `val_${createId()}`;
     const algorithmVersion =
       this.configService.get<string>('app.algorithmVersion') ?? '1.0.0';

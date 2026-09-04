@@ -5,10 +5,23 @@ export type AlgorandNetwork = 'testnet' | 'mainnet';
 
 export interface AlgorandNetworkConfig {
   walletAddress: string;
-  usdcAssetId: number;
+  usdcAssetId: string;
   facilitatorUrl: string;
   network: AlgorandNetwork;
+  caip2Network: string;
 }
+
+// CAIP-2 network identifiers are protocol constants, not environment
+// configuration - https://namespaces.chainagnostic.org/algorand/caip2
+const CAIP2_NETWORK: Record<AlgorandNetwork, string> = {
+  testnet: 'algorand:SGO1GKSzyE7IEPItTxCByw9x8FmnrCDexi9/cOUJOiI=',
+  mainnet: 'algorand:wGHE2Pwdvd7S12BL5FaOP20EGYesN73ktiC1qzkkit8=',
+};
+
+const DEFAULT_USDC_ASSET_ID: Record<AlgorandNetwork, string> = {
+  testnet: '10458941',
+  mainnet: '31566704',
+};
 
 /**
  * Single source of truth for Algorand network settings. Nothing outside
@@ -29,13 +42,14 @@ export class AlgorandConfigService {
       network === 'mainnet'
         ? {
             network,
+            caip2Network: CAIP2_NETWORK.mainnet,
             walletAddress: this.configService.get<string>(
               'ALGO_MAINNET_WALLET_ADDRESS',
               '',
             ),
-            usdcAssetId: this.parseAssetId(
-              this.configService.get<string>('ALGO_MAINNET_USDC_ASSET_ID'),
-              31566704,
+            usdcAssetId: this.configService.get<string>(
+              'ALGO_MAINNET_USDC_ASSET_ID',
+              DEFAULT_USDC_ASSET_ID.mainnet,
             ),
             facilitatorUrl: this.configService.get<string>(
               'ALGO_MAINNET_FACILITATOR_URL',
@@ -44,13 +58,14 @@ export class AlgorandConfigService {
           }
         : {
             network: 'testnet',
+            caip2Network: CAIP2_NETWORK.testnet,
             walletAddress: this.configService.get<string>(
               'ALGO_TESTNET_WALLET_ADDRESS',
               '',
             ),
-            usdcAssetId: this.parseAssetId(
-              this.configService.get<string>('ALGO_TESTNET_USDC_ASSET_ID'),
-              10458941,
+            usdcAssetId: this.configService.get<string>(
+              'ALGO_TESTNET_USDC_ASSET_ID',
+              DEFAULT_USDC_ASSET_ID.testnet,
             ),
             facilitatorUrl: this.configService.get<string>(
               'ALGO_TESTNET_FACILITATOR_URL',
@@ -59,16 +74,11 @@ export class AlgorandConfigService {
           };
   }
 
-  private parseAssetId(raw: string | undefined, fallback: number): number {
-    const parsed = raw !== undefined ? parseInt(raw, 10) : NaN;
-    return Number.isNaN(parsed) ? fallback : parsed;
-  }
-
   get walletAddress(): string {
     return this.config.walletAddress;
   }
 
-  get usdcAssetId(): number {
+  get usdcAssetId(): string {
     return this.config.usdcAssetId;
   }
 
@@ -78,5 +88,9 @@ export class AlgorandConfigService {
 
   get network(): AlgorandNetwork {
     return this.config.network;
+  }
+
+  get caip2Network(): string {
+    return this.config.caip2Network;
   }
 }

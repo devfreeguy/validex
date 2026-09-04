@@ -2,8 +2,9 @@ import type { Metadata } from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'Validex',
-  description: 'Startup health and validation API',
+  title: 'Validex — Startup health validation for AI agents',
+  description:
+    'Pay-per-call startup validation API. One request, a deterministic score, evidence-backed. Settled on Algorand via x402.',
 };
 
 export default function RootLayout({
@@ -13,7 +14,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body className="bg-neutral-950 text-neutral-100 antialiased">
+        {children}
+      </body>
     </html>
   );
 }

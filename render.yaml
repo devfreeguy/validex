@@ -1,0 +1,51 @@
+services:
+  - type: web
+    name: validex-api
+    runtime: node
+    rootDir: .
+    buildCommand: pnpm install --frozen-lockfile && pnpm --filter api build
+    startCommand: node apps/api/dist/main.js
+    healthCheckPath: /v1/health
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: DATABASE_DIRECT_URL
+        sync: false
+      - key: REDIS_URL
+        sync: false
+      - key: GITHUB_TOKEN
+        sync: false
+      - key: GROQ_API_KEY
+        sync: false
+      - key: GROQ_MODEL
+        sync: false
+      - key: NETWORK
+        sync: false
+      - key: ALGO_MAINNET_WALLET_ADDRESS
+        sync: false
+      - key: ALGO_TESTNET_WALLET_ADDRESS
+        sync: false
+      - key: ALGO_MAINNET_USDC_ASSET_ID
+        sync: false
+      - key: ALGO_TESTNET_USDC_ASSET_ID
+        sync: false
+      - key: ALGO_MAINNET_FACILITATOR_URL
+        sync: false
+      - key: ALGO_TESTNET_FACILITATOR_URL
+        sync: false
+      - key: NODE_ENV
+        sync: false
+      - key: PORT
+        sync: false
+      - key: ALGORITHM_VERSION
+        sync: false
+
+  - type: web
+    name: validex-web
+    runtime: node
+    rootDir: .
+    buildCommand: pnpm install --frozen-lockfile && pnpm --filter web build
+    startCommand: pnpm --filter web start
+    envVars:
+      - key: NEXT_PUBLIC_API_URL
+        sync: false

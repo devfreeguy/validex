@@ -17,8 +17,5 @@
   "packageManager": "pnpm@11.15.1",
   "engines": {
     "node": ">=20"
-  },
-  "dependencies": {
-    "algosdk": "^3.7.0"
   }
 }
