@@ -1,12 +1,28 @@
 import { Injectable } from '@nestjs/common';
-import { AnalysisStatus, AnalysisTier } from '@/analysis/analysis.types';
+import { createId } from '@paralleldrive/cuid2';
+import {
+  AnalysisStatus,
+  AnalysisTier,
+  CompanyEntity,
+  ValidationResult,
+  ValidatorTier,
+} from '@/analysis/analysis.types';
+import { EntityResolutionService } from '@/entity/entity-resolution.service';
+import { ValidatorRegistry } from '@/validators/registry/validator.registry';
+import { BaseValidator } from '@/validators/base.validator';
 import { QuickValidateDto } from './dto/quick-validate.dto';
 import { FullValidateDto } from './dto/full-validate.dto';
 
-export interface ValidateStubResult {
+export interface ValidateRunResult {
   analysisId: string;
-  status: AnalysisStatus;
   tier: AnalysisTier;
+  status: AnalysisStatus;
+  company: {
+    domain: string;
+    canonicalUrl: string;
+    companyName?: string;
+  };
+  validators: ValidationResult[];
 }
 
 export interface AnalysisStatusStubResult {
@@ -14,34 +30,59 @@ export interface AnalysisStatusStubResult {
   status: AnalysisStatus;
 }
 
-/**
- * Stub - no business logic yet. Returns placeholder responses so the API
- * surface can be wired up and tested end to end.
- */
 @Injectable()
 export class ValidateService {
-  async quickValidate(dto: QuickValidateDto): Promise<ValidateStubResult> {
-    void dto;
-    return {
-      analysisId: 'val_stub',
-      status: AnalysisStatus.PENDING,
-      tier: AnalysisTier.QUICK,
-    };
+  constructor(
+    private readonly entityResolutionService: EntityResolutionService,
+    private readonly validatorRegistry: ValidatorRegistry,
+  ) {}
+
+  async quickValidate(dto: QuickValidateDto): Promise<ValidateRunResult> {
+    const entity = await this.entityResolutionService.resolve(dto.target);
+    const validators = this.validatorRegistry.getByTier(ValidatorTier.QUICK);
+    return this.run(entity, AnalysisTier.QUICK, validators);
   }
 
-  async fullValidate(dto: FullValidateDto): Promise<ValidateStubResult> {
-    void dto;
-    return {
-      analysisId: 'val_stub',
-      status: AnalysisStatus.PENDING,
-      tier: AnalysisTier.FULL,
-    };
+  async fullValidate(dto: FullValidateDto): Promise<ValidateRunResult> {
+    const entity = await this.entityResolutionService.resolve(dto.target);
+    // Quick + full validators together - the registry only holds these two
+    // tiers today, so getAll() is exactly "quick and full".
+    const validators = this.validatorRegistry.getAll();
+    return this.run(entity, AnalysisTier.FULL, validators);
   }
 
   async getAnalysis(analysisId: string): Promise<AnalysisStatusStubResult> {
     return {
       analysisId,
       status: AnalysisStatus.PENDING,
+    };
+  }
+
+  private async run(
+    entity: CompanyEntity,
+    tier: AnalysisTier,
+    validators: BaseValidator[],
+  ): Promise<ValidateRunResult> {
+    const settled = await Promise.allSettled(
+      validators.map((validator) => validator.execute(entity)),
+    );
+
+    const results: ValidationResult[] = settled.map((outcome, index) =>
+      outcome.status === 'fulfilled'
+        ? outcome.value
+        : validators[index].error(entity, outcome.reason),
+    );
+
+    return {
+      analysisId: `val_${createId()}`,
+      tier,
+      status: AnalysisStatus.COMPLETED,
+      company: {
+        domain: entity.domain,
+        canonicalUrl: entity.canonicalUrl,
+        companyName: entity.companyName,
+      },
+      validators: results,
     };
   }
 }
