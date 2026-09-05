@@ -1,6 +1,9 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { HTTPFacilitatorClient, x402ResourceServer } from '@x402/core/server';
-import { decodePaymentSignatureHeader } from '@x402/core/http';
+import {
+  decodePaymentSignatureHeader,
+  encodePaymentResponseHeader,
+} from '@x402/core/http';
 import type {
   Network,
   PaymentRequired,
@@ -36,6 +39,10 @@ export interface VerifyPaymentResult {
 export interface SettlePaymentResult {
   success: boolean;
   txId?: string;
+  /** Base64 header value x402 clients (e.g. @x402/axios) read from the
+   * successful response to confirm settlement - see PAYMENT-RESPONSE /
+   * X-PAYMENT-RESPONSE in the x402 spec. */
+  encodedResponseHeader?: string;
 }
 
 /**
@@ -148,7 +155,11 @@ export class X402Service implements OnModuleInit {
     try {
       const payload = decodePaymentSignatureHeader(paymentHeader);
       const result = await this.server.settlePayment(payload, requirements);
-      return { success: result.success, txId: result.transaction };
+      return {
+        success: result.success,
+        txId: result.transaction,
+        encodedResponseHeader: encodePaymentResponseHeader(result),
+      };
     } catch (err) {
       this.logger.debug(`Payment settlement failed: ${String(err)}`);
       return { success: false };

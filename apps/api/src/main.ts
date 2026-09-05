@@ -24,6 +24,23 @@ async function bootstrap(): Promise<void> {
 
   app.setGlobalPrefix('v1');
 
+  // This is a public, payment-gated API meant to be called from arbitrary
+  // browser-based clients (including our own /app) and AI agents - there's
+  // no cookie/session auth to protect, so allow any origin. allowedHeaders
+  // is left unset so @fastify/cors reflects back whatever the browser's
+  // preflight actually requested (covers the custom X-PAYMENT header and
+  // whatever else an x402 client library sends) instead of an incomplete
+  // hardcoded list.
+  app.enableCors({
+    origin: true,
+    methods: ['GET', 'POST', 'OPTIONS'],
+    exposedHeaders: [
+      'PAYMENT-RESPONSE',
+      'X-PAYMENT-RESPONSE',
+      'X-PAYMENT-TX-ID',
+    ],
+  });
+
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
@@ -90,8 +107,17 @@ async function bootstrap(): Promise<void> {
         return;
       }
 
+      // These are response headers, not request headers - the request
+      // object has already been read by this point, so mutating its
+      // headers would never reach the client. x402 client libraries (e.g.
+      // @x402/axios) read PAYMENT-RESPONSE/X-PAYMENT-RESPONSE off the
+      // response to confirm settlement.
+      if (settleResult.encodedResponseHeader) {
+        reply.header('PAYMENT-RESPONSE', settleResult.encodedResponseHeader);
+        reply.header('X-PAYMENT-RESPONSE', settleResult.encodedResponseHeader);
+      }
       if (settleResult.txId) {
-        request.headers['x-payment-tx-id'] = settleResult.txId;
+        reply.header('X-PAYMENT-TX-ID', settleResult.txId);
       }
     },
   );
