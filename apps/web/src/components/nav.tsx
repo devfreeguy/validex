@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { WalletConnect } from './wallet-connect';
 
 export function Nav() {
   return (
@@ -7,19 +8,17 @@ export function Nav() {
         <Link href="/" className="text-lg font-semibold tracking-tight">
           Validex
         </Link>
-        <nav className="flex items-center gap-6 text-sm text-neutral-400">
-          <Link href="/docs" className="transition hover:text-neutral-100">
-            Docs
-          </Link>
-          <a
-            href="https://x402.org"
-            target="_blank"
-            rel="noreferrer"
-            className="transition hover:text-neutral-100"
-          >
-            x402
-          </a>
-        </nav>
+        <div className="flex items-center gap-6">
+          <nav className="flex items-center gap-6 text-sm text-neutral-400">
+            <Link href="/app" className="transition hover:text-neutral-100">
+              Try it
+            </Link>
+            <Link href="/docs" className="transition hover:text-neutral-100">
+              Docs
+            </Link>
+          </nav>
+          <WalletConnect />
+        </div>
       </div>
     </header>
   );

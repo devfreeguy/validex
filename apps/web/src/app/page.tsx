@@ -44,10 +44,10 @@ export default function Home() {
           </p>
           <div className="mt-8 flex justify-center gap-3">
             <a
-              href="#pricing"
+              href="/app"
               className="rounded-full bg-emerald-400 px-5 py-2.5 text-sm font-medium text-neutral-950 transition hover:bg-emerald-300"
             >
-              View pricing
+              Try it now
             </a>
             <a
               href="/docs"

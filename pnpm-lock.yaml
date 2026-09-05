@@ -165,12 +165,27 @@ importers:
       '@txnlab/use-wallet':
         specifier: ^5.0.0
         version: 5.0.0(algosdk@3.7.0)
+      '@txnlab/use-wallet-mnemonic':
+        specifier: ^5.0.0
+        version: 5.0.0(@txnlab/use-wallet@5.0.0(algosdk@3.7.0))(algosdk@3.7.0)
+      '@txnlab/use-wallet-pera':
+        specifier: ^5.0.0
+        version: 5.0.0(@txnlab/use-wallet@5.0.0(algosdk@3.7.0))(algosdk@3.7.0)
+      '@txnlab/use-wallet-react':
+        specifier: ^5.0.0
+        version: 5.0.0(algosdk@3.7.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@x402/avm':
+        specifier: ^2.24.0
+        version: 2.24.0
       '@x402/axios':
         specifier: ^2.24.0
         version: 2.24.0(axios@1.20.0(debug@4.4.3(supports-color@8.1.1))(supports-color@8.1.1))
       '@x402/next':
         specifier: ^2.24.0
         version: 2.24.0(next@15.5.25(@babel/core@7.29.7(supports-color@8.1.1))(@types/node@22.20.1)(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(typescript@5.9.3)
+      axios:
+        specifier: ^1.20.0
+        version: 1.20.0(debug@4.4.3(supports-color@8.1.1))(supports-color@8.1.1)
       next:
         specifier: ^15.1.3
         version: 15.5.25(@babel/core@7.29.7(supports-color@8.1.1))(@types/node@22.20.1)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
@@ -468,6 +483,9 @@ packages:
   '@eslint/js@8.57.1':
     resolution: {integrity: sha512-d9zaMRSTIKDLhctzH12MtXvJKSSUhaHcjV+2Z+GK+EEY7XKpP5yR4x+N3TAcHTcu963nIr+TMcCb4DBCYX1z6Q==}
     engines: {node: ^12.22.0 || ^14.17.0 || >=16.0.0}
+
+  '@evanhahn/lottie-web-light@5.8.1':
+    resolution: {integrity: sha512-U0G1tt3/UEYnyCNNslWPi1dB7X1xQ9aoSip+B3GTKO/Bns8yz/p39vBkRSN9d25nkbHuCsbjky2coQftj5YVKw==}
 
   '@fastify/accept-negotiator@1.1.0':
     resolution: {integrity: sha512-OIHZrb2ImZ7XG85HXOONLcJWGosv7sIvM2ifAPQVhg9Lv7qdmMBNVaai4QTdyuaqbKM5eO6sLSQOYI7wEQeCJQ==}
@@ -1048,6 +1066,15 @@ packages:
     resolution: {integrity: sha512-OqiFvSOF0dBSesELYY2CAMa4YINvlLpvKOz/rv6NeZEqiyttlHgv98Juwv4Ch+GrEV7IZ8jfI2VcEoYUjXXCjw==}
     hasBin: true
 
+  '@perawallet/connect@1.6.0':
+    resolution: {integrity: sha512-lbOTCvHvlE06buRKIEx6pz0cOEpSoy0brUpOa6IWwNrVKihgSzOFxnYriqc8bUpwYjKDWKLi4bl5qJXcxRTeNw==}
+    peerDependencies:
+      algosdk: ^3.5.2
+
+  '@perawallet/walletconnect@1.0.0':
+    resolution: {integrity: sha512-y7nSd2OEyX9eLMtuZH3RXC083OQ6QY7Q90MN5WguuueShiiuuHu7Ow2ofRtD+y2Ts/FQDttqPTkD4LyKGwwk3Q==}
+    engines: {node: '>=22'}
+
   '@pinojs/redact@0.4.0':
     resolution: {integrity: sha512-k2ENnmBugE/rzQfEcdWHcCY+/FM3VLzH9cYEsbdsoqrvzAKRhUZeRNhAZvB8OitQJ1TBed3yqWtdjzS6wJKBwg==}
 
@@ -1278,6 +1305,12 @@ packages:
   '@swc/helpers@0.5.15':
     resolution: {integrity: sha512-JQ5TuMi45Owi4/BIMAJBoSQoOJu12oOk/gADqlcUL9JEdHB8vyjUSsxqeNXnmXHjYKMi2WcYtezGEEhqUI/E2g==}
 
+  '@tanstack/react-store@0.9.1':
+    resolution: {integrity: sha512-YzJLnRvy5lIEFTLWBAZmcOjK3+2AepnBv/sr6NZmiqJvq7zTQggyK99Gw8fqYdMdHPQWXjz0epFKJXC+9V2xDA==}
+    peerDependencies:
+      react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
+      react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
+
   '@tanstack/store@0.9.1':
     resolution: {integrity: sha512-+qcNkOy0N1qSGsP7omVCW0SDrXtaDcycPqBDE726yryiA5eTDFpjBReaYjghVJwNf1pcPMyzIwTGlYjCSQR0Fg==}
 
@@ -1299,6 +1332,28 @@ packages:
 
   '@tsconfig/node16@1.0.4':
     resolution: {integrity: sha512-vxhUy4J8lyeyinH7Azl1pdd43GJhZH/tP2weN8TntQblOY+A0XbT8DJk1/oCPuOOyg/Ja757rG0CgHcWC8OfMA==}
+
+  '@txnlab/use-wallet-mnemonic@5.0.0':
+    resolution: {integrity: sha512-a2O6+em+DIiVavmXtDUD1gOcH8UWtYKPHTak/ENMKHhZy8Ghbv/Pd/gFbGHlGpDMM1IG50ik52MpTACkrYsYZA==}
+    engines: {node: '>=22'}
+    peerDependencies:
+      '@txnlab/use-wallet': ^5.0.0
+      algosdk: ^3.0.0
+
+  '@txnlab/use-wallet-pera@5.0.0':
+    resolution: {integrity: sha512-kTqbD47GcKOjLSr2OjDAfH4aP04Cme2aBUVbZpz7OgaBdALxvFk0bBpznv4TD4RN5X1JQ4438w9HlJPEFaKgHg==}
+    engines: {node: '>=22'}
+    peerDependencies:
+      '@txnlab/use-wallet': ^5.0.0
+      algosdk: ^3.5.2
+
+  '@txnlab/use-wallet-react@5.0.0':
+    resolution: {integrity: sha512-jdmNwmiTVZ2irMGYggFbkKN7TNeWa3LWfBCIYcDAuj/l/pMxqD6rL8ys/wwxi7nHwcnLXlG6+uRG5Z1dLuldJw==}
+    engines: {node: '>=22'}
+    peerDependencies:
+      algosdk: ^3.0.0
+      react: ^17.0.0 || ^18.0.0 || ^19.0.0
+      react-dom: ^17.0.0 || ^18.0.0 || ^19.0.0
 
   '@txnlab/use-wallet@5.0.0':
     resolution: {integrity: sha512-GHAD3Kwq7w/HbR3I/SUnzHXIW9qaBLxf7RvS52YEZfuTji5gppVarDly8TVpAzJwGisH51burywYP0qpad/nCw==}
@@ -1976,6 +2031,9 @@ packages:
 
   boolbase@1.0.0:
     resolution: {integrity: sha512-JZOSA7Mo9sNGB8+UjSgzdLtokWAky1zbztM3WRLCbZ70/3cTANmQmOdR7y2g+J0e2WXywy1yS468tY+IruqEww==}
+
+  bowser@2.11.0:
+    resolution: {integrity: sha512-AlcaJBi/pqqJBIQ8U9Mcpc9i8Aqxn88Skv5d+xBX006BY5u8N3mGLHa5Lgppa7L/HfwgwLgZ6NYs+Ag6uUmJRA==}
 
   brace-expansion@1.1.18:
     resolution: {integrity: sha512-Edep/X9fGqVNmzKBVsDYIOtD+z1tuezV70LBjdCst9Tqu76lsnvRiZ6oTic1n+/BIwX6QDGAO94PN4N2SADvtw==}
@@ -4224,6 +4282,12 @@ packages:
   pure-rand@6.1.0:
     resolution: {integrity: sha512-bVWawvoZoBYpp6yIoQtQXHZjmz35RSVHnUOTefl8Vcjr8snTPY1wnpSPMWekcFwbxI6gtmT7rSYPFvz71ldiOA==}
 
+  qr-code-styling@1.6.0-rc.1:
+    resolution: {integrity: sha512-ModRIiW6oUnsP18QzrRYZSc/CFKFKIdj7pUs57AEVH20ajlglRpN3HukjHk0UbNMTlKGuaYl7Gt6/O5Gg2NU2Q==}
+
+  qrcode-generator@1.5.2:
+    resolution: {integrity: sha512-pItrW0Z9HnDBnFmgiNrY1uxRdri32Uh9EjNYLPVC2zZ3ZRIIEqBoDgm4DkvDwNNDHTK7FNkmr8zAa77BYc9xNw==}
+
   queue-microtask@1.2.3:
     resolution: {integrity: sha512-NuaNSa6flKT5JaSYQzJok04JzTL1CA6aGhv5rfLW3PgqA+M2ChpZQnAC8h8i4ZFkBS8X5RqkDBHA7r4hej3K9A==}
 
@@ -4852,8 +4916,14 @@ packages:
     resolution: {integrity: sha512-NoZ4roiN7LnbKn9QqE1amc9DJfzvZXxF4xDavcOWt1BPkdx+m+0gJuPM+S0vCe7zTJMYUP0R8pO2XMr+Y8oLIg==}
     engines: {node: '>=6'}
 
+  tslib@1.14.1:
+    resolution: {integrity: sha512-Xni35NKzjgMrwevysHTCArtLDpPvye8zV/0E4EyYn43P7/7qvQwPh9BGkHewbMulVntbigmcT7rdX3BNo9wRJg==}
+
   tslib@2.8.1:
     resolution: {integrity: sha512-oJFu94HQb+KVduSUQL7wnpmqnfmLsOA/nAh6b6EH0wCEoK0/mPeXU6c3wKDV83MkOuHPRHtSXKKU99IBazS/2w==}
+
+  tweetnacl-ts@1.0.3:
+    resolution: {integrity: sha512-C5I/dWf6xjAXaCDlf84T4HvozU/8ycAlq5WRllF1hAeeq5390tfXD+bNas5bhEV0HMSOx8bsQYpLjPl8wfnEeQ==}
 
   tweetnacl@1.0.3:
     resolution: {integrity: sha512-6rt+RN7aOi1nGMyC4Xa5DdYiukl2UWCbcJft7YhxReBGQD7OAM8Pbxw6YMo4r2diNEA8FEmu32YOn9rhaiE5yw==}
@@ -4943,6 +5013,11 @@ packages:
 
   uri-js@4.4.1:
     resolution: {integrity: sha512-7rKUyy33Q1yc98pQ1DAmLtwX109F7TIfWlW1Ydo8Wl1ii1SeHieeh0HHfPeL2fMXK6z0s8ecKs9frCuLJvndBg==}
+
+  use-sync-external-store@1.6.0:
+    resolution: {integrity: sha512-Pp6GSwGP/NrPIrxVFAIkOQeyw8lFenOHijQWkUTrDvrF4ALqylP2C/KCkeS9dpUM3KvYRQhna5vt7IL95+ZQ9w==}
+    peerDependencies:
+      react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
 
   util-deprecate@1.0.2:
     resolution: {integrity: sha512-EPD5q1uXyFxJpCrLnCc1nHnq3gOa6DZBocAIiI2TaSCA7VCJ1UJDMagCzIkXNsUYfD1daK//LTEQ8xiIbrHtcw==}
@@ -5427,6 +5502,8 @@ snapshots:
       - supports-color
 
   '@eslint/js@8.57.1': {}
+
+  '@evanhahn/lottie-web-light@5.8.1': {}
 
   '@fastify/accept-negotiator@1.1.0': {}
 
@@ -6064,6 +6141,22 @@ snapshots:
       bignumber.js: 9.3.1
       error-causes: 3.0.2
 
+  '@perawallet/connect@1.6.0(algosdk@3.7.0)':
+    dependencies:
+      '@evanhahn/lottie-web-light': 5.8.1
+      '@perawallet/walletconnect': 1.0.0
+      algosdk: 3.7.0
+      bowser: 2.11.0
+      buffer: 6.0.3
+      qr-code-styling: 1.6.0-rc.1
+      tslib: 2.8.1
+      tweetnacl-ts: 1.0.3
+
+  '@perawallet/walletconnect@1.0.0':
+    dependencies:
+      '@noble/ciphers': 2.4.0
+      '@noble/hashes': 2.4.0
+
   '@pinojs/redact@0.4.0': {}
 
   '@pkgjs/parseargs@0.11.0':
@@ -6311,6 +6404,13 @@ snapshots:
     dependencies:
       tslib: 2.8.1
 
+  '@tanstack/react-store@0.9.1(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
+    dependencies:
+      '@tanstack/store': 0.9.1
+      react: 19.2.8
+      react-dom: 19.2.8(react@19.2.8)
+      use-sync-external-store: 1.6.0(react@19.2.8)
+
   '@tanstack/store@0.9.1': {}
 
   '@tokenizer/inflate@0.2.7(supports-color@8.1.1)':
@@ -6330,6 +6430,25 @@ snapshots:
   '@tsconfig/node14@1.0.3': {}
 
   '@tsconfig/node16@1.0.4': {}
+
+  '@txnlab/use-wallet-mnemonic@5.0.0(@txnlab/use-wallet@5.0.0(algosdk@3.7.0))(algosdk@3.7.0)':
+    dependencies:
+      '@txnlab/use-wallet': 5.0.0(algosdk@3.7.0)
+      algosdk: 3.7.0
+
+  '@txnlab/use-wallet-pera@5.0.0(@txnlab/use-wallet@5.0.0(algosdk@3.7.0))(algosdk@3.7.0)':
+    dependencies:
+      '@perawallet/connect': 1.6.0(algosdk@3.7.0)
+      '@txnlab/use-wallet': 5.0.0(algosdk@3.7.0)
+      algosdk: 3.7.0
+
+  '@txnlab/use-wallet-react@5.0.0(algosdk@3.7.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
+    dependencies:
+      '@tanstack/react-store': 0.9.1(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@txnlab/use-wallet': 5.0.0(algosdk@3.7.0)
+      algosdk: 3.7.0
+      react: 19.2.8
+      react-dom: 19.2.8(react@19.2.8)
 
   '@txnlab/use-wallet@5.0.0(algosdk@3.7.0)':
     dependencies:
@@ -7130,6 +7249,8 @@ snapshots:
   bn.js@5.2.5: {}
 
   boolbase@1.0.0: {}
+
+  bowser@2.11.0: {}
 
   brace-expansion@1.1.18:
     dependencies:
@@ -9775,6 +9896,12 @@ snapshots:
 
   pure-rand@6.1.0: {}
 
+  qr-code-styling@1.6.0-rc.1:
+    dependencies:
+      qrcode-generator: 1.5.2
+
+  qrcode-generator@1.5.2: {}
+
   queue-microtask@1.2.3: {}
 
   quick-format-unescaped@4.0.4: {}
@@ -10424,7 +10551,13 @@ snapshots:
       minimist: 1.2.8
       strip-bom: 3.0.0
 
+  tslib@1.14.1: {}
+
   tslib@2.8.1: {}
+
+  tweetnacl-ts@1.0.3:
+    dependencies:
+      tslib: 1.14.1
 
   tweetnacl@1.0.3: {}
 
@@ -10535,6 +10668,10 @@ snapshots:
   uri-js@4.4.1:
     dependencies:
       punycode: 2.3.1
+
+  use-sync-external-store@1.6.0(react@19.2.8):
+    dependencies:
+      react: 19.2.8
 
   util-deprecate@1.0.2: {}
 

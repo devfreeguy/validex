@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import './globals.css';
+import { Providers } from './providers';
 
 export const metadata: Metadata = {
   title: 'Validex — Startup health validation for AI agents',
@@ -15,7 +16,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="bg-neutral-950 text-neutral-100 antialiased">
-        {children}
+        <Providers>{children}</Providers>
       </body>
     </html>
   );
