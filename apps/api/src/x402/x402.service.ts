@@ -2,6 +2,7 @@ import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { HTTPFacilitatorClient, x402ResourceServer } from '@x402/core/server';
 import {
   decodePaymentSignatureHeader,
+  encodePaymentRequiredHeader,
   encodePaymentResponseHeader,
 } from '@x402/core/http';
 import type {
@@ -17,19 +18,23 @@ import {
 import { AlgorandConfigService } from '@/config/algorand.config';
 import {
   PAYMENT_TIMEOUT_SECONDS,
+  TIER_BAZAAR_META,
   TIER_PRICE_ATOMIC,
-  ValidateTier,
+  TierKey,
 } from './x402.constants';
 
 const BAZAAR_SERVICE_NAME = 'Validex';
-const BAZAAR_DESCRIPTION =
-  'Startup health and validation API for AI agents and developers';
-const BAZAAR_TAGS = [
-  'x402-global-challenge',
-  'validation',
-  'startup-health',
-  'api',
-];
+
+// x402-merchant has no dedicated helper in @x402/extensions (only `bazaar`
+// does) - PaymentRequired.extensions is a plain Record<string, unknown>, so
+// this is hand-built from the shape documented at
+// https://facilitator.goplausible.xyz/guide/discovery. Declaring it
+// controls how the facilitator displays us; omitting it would still work,
+// falling back to our root page's OpenGraph tags / llms.txt / agent-card.json.
+const X402_MERCHANT_INFO = {
+  name: BAZAAR_SERVICE_NAME,
+  categories: ['api', 'algorand', 'x402'],
+};
 
 export interface VerifyPaymentResult {
   valid: boolean;
@@ -76,9 +81,7 @@ export class X402Service implements OnModuleInit {
     );
   }
 
-  async buildPaymentRequirements(
-    tier: ValidateTier,
-  ): Promise<PaymentRequirements> {
+  async buildPaymentRequirements(tier: TierKey): Promise<PaymentRequirements> {
     const [requirements] = await this.server.buildPaymentRequirements({
       scheme: 'exact',
       payTo: this.algorandConfig.walletAddress,
@@ -99,36 +102,79 @@ export class X402Service implements OnModuleInit {
    * fully-qualified URL of the route being paywalled.
    */
   async buildPaymentRequiredResponse(
-    tier: ValidateTier,
+    tier: TierKey,
     resourceUrl: string,
     requirements?: PaymentRequirements,
   ): Promise<PaymentRequired> {
     const resolvedRequirements =
       requirements ?? (await this.buildPaymentRequirements(tier));
+    const meta = TIER_BAZAAR_META[tier];
 
-    const declaredExtensions = declareDiscoveryExtension({
-      bodyType: 'json',
-      input: { target: 'stripe.com' },
-      inputSchema: {
-        properties: { target: { type: 'string' } },
-        required: ['target'],
+    // Every endpoint is individually discoverable with its own body schema -
+    // all of them take a single `target` string except compare, which takes
+    // a `targets` array (2-5 domains) instead.
+    const declaredExtensions =
+      tier === 'compare'
+        ? declareDiscoveryExtension({
+            bodyType: 'json',
+            input: { targets: ['stripe.com', 'github.com'] },
+            inputSchema: {
+              properties: {
+                targets: {
+                  type: 'array',
+                  items: { type: 'string' },
+                  minItems: 2,
+                  maxItems: 5,
+                },
+              },
+              required: ['targets'],
+            },
+            output: { example: { success: true } },
+          })
+        : declareDiscoveryExtension({
+            bodyType: 'json',
+            input: { target: 'stripe.com' },
+            inputSchema: {
+              properties: { target: { type: 'string' } },
+              required: ['target'],
+            },
+            output: { example: { success: true } },
+          });
+
+    const origin = new URL(resourceUrl).origin;
+    const extensions = {
+      ...declaredExtensions,
+      'x402-merchant': {
+        info: {
+          ...X402_MERCHANT_INFO,
+          website: origin,
+          logo: `${origin}/apple-touch-icon.png`,
+        },
       },
-      output: {
-        example: { success: true },
-      },
-    });
+    };
 
     return this.server.createPaymentRequiredResponse(
       [resolvedRequirements],
       {
         url: resourceUrl,
-        serviceName: BAZAAR_SERVICE_NAME,
-        description: BAZAAR_DESCRIPTION,
-        tags: BAZAAR_TAGS,
+        serviceName: meta.serviceName,
+        description: meta.description,
+        tags: meta.tags,
       },
       'Payment required',
-      declaredExtensions,
+      extensions,
     );
+  }
+
+  /**
+   * x402 v2 clients (e.g. @x402/axios's x402HTTPClient.getPaymentRequiredResponse)
+   * read the payment requirements off a PAYMENT-REQUIRED response header,
+   * not the JSON body - the body is still sent alongside it for the Bazaar
+   * crawler and for anything reading the response by hand. Without this
+   * header a spec-compliant x402 client can't complete a payment at all.
+   */
+  buildPaymentRequiredHeader(paymentRequired: PaymentRequired): string {
+    return encodePaymentRequiredHeader(paymentRequired);
   }
 
   async verifyPayment(

@@ -10,6 +10,12 @@ datasource db {
 }
 
 enum AnalysisTier {
+  security
+  trust
+  web
+  engineering
+  ai
+  compare
   quick
   full
 }
@@ -88,4 +94,21 @@ model ValidatorResult {
   @@index([analysisId])
   @@index([validatorId])
   @@map("validator_results")
+}
+
+/**
+ * No hard FK to Analysis rows - each target compared is persisted as its
+ * own ordinary Analysis row (via the same full-tier pipeline), and this row
+ * just links them by storing their analysisIds inside `ranking`.
+ */
+model Comparison {
+  id            String   @id @default(cuid())
+  comparisonId  String   @unique
+  targets       String[]
+  targetCount   Int
+  ranking       Json
+  createdAt     DateTime @default(now())
+
+  @@index([comparisonId])
+  @@map("comparisons")
 }

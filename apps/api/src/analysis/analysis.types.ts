@@ -1,4 +1,17 @@
+/**
+ * What produced a given Analysis row - one member per x402 endpoint tier
+ * (see TierKey in x402.constants.ts, which this must stay aligned with).
+ * `COMPARE` tags the per-target rows a POST /v1/validate/compare call
+ * creates (full validator set, no AI - see TIER_VALIDATOR_MAP) so they're
+ * distinguishable from a real POST /v1/validate/full call, which does run AI.
+ */
 export enum AnalysisTier {
+  SECURITY = 'security',
+  TRUST = 'trust',
+  WEB = 'web',
+  ENGINEERING = 'engineering',
+  AI = 'ai',
+  COMPARE = 'compare',
   QUICK = 'quick',
   FULL = 'full',
 }
