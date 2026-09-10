@@ -4,21 +4,31 @@
 # ─────────────────────────────────────────────
 FROM node:22-alpine AS deps
 
-# Enable corepack so pnpm is available without a separate install step
-RUN corepack enable && corepack prepare pnpm@latest --activate
+# Pin to the exact pnpm version from packageManager field in package.json.
+# @latest would risk grabbing a different version that breaks the frozen lockfile.
+RUN corepack enable && corepack prepare pnpm@11.15.1 --activate
 
 WORKDIR /repo
 
-# Copy manifests first – layer-cached until they change
+# Copy ALL workspace manifests so pnpm can resolve the full graph.
+# packages/shared must be present even if the API doesn't directly depend on it –
+# pnpm needs every workspace member's package.json to build the resolution graph.
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY apps/api/package.json ./apps/api/package.json
+COPY packages/shared/package.json ./packages/shared/package.json
 
-# Install ALL dependencies (needed so pnpm deploy can resolve the graph)
-RUN pnpm install --frozen-lockfile
+# Copy Prisma schema now so it's available if any lifecycle script needs it.
+COPY apps/api/prisma ./apps/api/prisma
 
-# Produce a self-contained deployment directory for the API only
-# This copies the resolved node_modules + package.json into /deploy/api
-RUN pnpm --filter api deploy --prod /deploy/api
+# Install with --ignore-scripts so the postinstall `prisma generate` hook
+# doesn't fire here (no src/generated output dir exists yet; that happens in
+# the builder stage where full source is present).
+RUN pnpm install --frozen-lockfile --ignore-scripts
+
+# Produce a self-contained deployment directory for the API only.
+# --ignore-scripts prevents postinstall from running again inside /deploy/api
+# where the prisma schema context would be wrong.
+RUN pnpm --filter api deploy --prod --ignore-scripts /deploy/api
 
 
 # ─────────────────────────────────────────────
@@ -26,7 +36,7 @@ RUN pnpm --filter api deploy --prod /deploy/api
 # ─────────────────────────────────────────────
 FROM node:22-alpine AS builder
 
-RUN corepack enable && corepack prepare pnpm@latest --activate
+RUN corepack enable && corepack prepare pnpm@11.15.1 --activate
 
 WORKDIR /repo
 
@@ -73,15 +83,30 @@ COPY --from=deps /deploy/api/package.json ./package.json
 # Compiled output
 COPY --from=builder /repo/apps/api/dist ./dist
 
-# Prisma schema & migrations (needed at runtime for `prisma migrate deploy`)
+# Prisma schema & migrations folder (needed at runtime for `prisma migrate deploy`)
 COPY --from=builder /repo/apps/api/prisma ./prisma
+
+# Prisma config – Prisma 7 reads DATABASE_DIRECT_URL from this file for migrations.
+# The schema.prisma datasource block has no `url` field, so without this file
+# `prisma migrate deploy` would have no connection string and would fail.
+COPY --from=builder /repo/apps/api/prisma.config.ts ./prisma.config.ts
 
 # Generated Prisma client (output path matches schema: ../src/generated/prisma)
 COPY --from=builder /repo/apps/api/src/generated ./src/generated
+
+# Copy the prisma CLI binary from the builder so we can run `prisma migrate deploy`
+# at startup without hitting the network. `prisma` is a devDependency so it is
+# NOT included in the --prod node_modules from the deploy stage.
+# @prisma/engines must also come along – it contains the migration engine binary
+# that `prisma migrate deploy` invokes. Without it the command crashes at startup
+# with "engine binary not found" even if the prisma CLI itself is present.
+COPY --from=builder /repo/apps/api/node_modules/.bin/prisma ./node_modules/.bin/prisma
+COPY --from=builder /repo/apps/api/node_modules/prisma ./node_modules/prisma
+COPY --from=builder /repo/apps/api/node_modules/@prisma/engines ./node_modules/@prisma/engines
 
 # Expose the API port (Render injects $PORT; default matches .env.example)
 EXPOSE 5000
 
 # Run Prisma migrations then start the server.
-# Using sh -c so $PORT is evaluated at runtime.
-CMD ["sh", "-c", "npx prisma migrate deploy && node dist/main.js"]
+# Use the local prisma binary directly instead of npx to avoid a network round-trip.
+CMD ["sh", "-c", "node_modules/.bin/prisma migrate deploy && node dist/main.js"]
