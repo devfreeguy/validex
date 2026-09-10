@@ -2,7 +2,7 @@
 # Stage 1: Install ALL workspace dependencies
 # and prune down to only what the API needs.
 # ─────────────────────────────────────────────
-FROM node:20-alpine AS deps
+FROM node:22-alpine AS deps
 
 # Enable corepack so pnpm is available without a separate install step
 RUN corepack enable && corepack prepare pnpm@latest --activate
@@ -24,7 +24,7 @@ RUN pnpm --filter api deploy --prod /deploy/api
 # ─────────────────────────────────────────────
 # Stage 2: Build the NestJS application
 # ─────────────────────────────────────────────
-FROM node:20-alpine AS builder
+FROM node:22-alpine AS builder
 
 RUN corepack enable && corepack prepare pnpm@latest --activate
 
@@ -46,7 +46,7 @@ RUN pnpm --filter api exec prisma generate && \
 # ─────────────────────────────────────────────
 # Stage 3: Lean production image
 # ─────────────────────────────────────────────
-FROM node:20-alpine AS runner
+FROM node:22-alpine AS runner
 
 # Install Playwright OS-level dependencies + chromium for the scraper validators
 # (remove this block if you don't use Playwright in prod)
