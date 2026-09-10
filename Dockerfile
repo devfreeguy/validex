@@ -56,7 +56,8 @@ COPY apps/api ./apps/api
 COPY packages/shared ./packages/shared
 
 # Generate Prisma client then compile TypeScript
-RUN pnpm --filter api exec prisma generate && \
+RUN pnpm config set verify-deps-before-run false && \
+    DATABASE_DIRECT_URL="postgresql://build-placeholder:dummy@localhost:5432/dummy" pnpm --filter api exec prisma generate && \
     pnpm --filter api build
 
 
