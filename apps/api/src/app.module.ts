@@ -19,6 +19,7 @@ import { OsvModule } from '@/providers/osv/osv.module';
 import { EngineModule } from '@/engine/engine.module';
 import { X402Module } from '@/x402/x402.module';
 import { HealthModule } from '@/health/health.module';
+import { WellKnownModule } from '@/well-known/well-known.module';
 
 @Module({
   imports: [
@@ -59,6 +60,7 @@ import { HealthModule } from '@/health/health.module';
     EngineModule,
     X402Module,
     HealthModule,
+    WellKnownModule,
     EntityModule,
     ValidatorsModule,
     ValidateModule,

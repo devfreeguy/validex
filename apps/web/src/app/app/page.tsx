@@ -2,18 +2,12 @@
 
 import { useState } from 'react';
 import { useWallet } from '@txnlab/use-wallet-react';
-import { Nav } from '@/components/nav';
-import { WalletConnect } from '@/components/wallet-connect';
+import { AlertCircle } from 'lucide-react';
+import { SiteHeader } from '@/components/site-header';
 import { ReportView } from '@/components/report-view';
+import { ValidateForm, TIERS, type Tier } from '@/components/validate-form';
 import { createPaidApiClient } from '@/lib/x402-client';
 import type { AnalysisReport, ApiEnvelope } from '@/lib/report-types';
-
-type Tier = 'quick' | 'full';
-
-const TIERS: Array<{ id: Tier; label: string; price: string }> = [
-  { id: 'quick', label: 'Quick', price: '$0.50' },
-  { id: 'full', label: 'Full', price: '$1.00' },
-];
 
 function isAxiosErrorLike(err: unknown): err is {
   response?: { status?: number; data?: unknown };
@@ -22,8 +16,8 @@ function isAxiosErrorLike(err: unknown): err is {
   return typeof err === 'object' && err !== null && 'message' in err;
 }
 
-export default function AppPage() {
-  const { activeAddress, signTransactions } = useWallet();
+export default function ValidatePage() {
+  const { activeAddress, isReady, signTransactions } = useWallet();
   const [target, setTarget] = useState('');
   const [tier, setTier] = useState<Tier>('quick');
   const [loading, setLoading] = useState(false);
@@ -31,7 +25,13 @@ export default function AppPage() {
   const [error, setError] = useState<string | null>(null);
   const [report, setReport] = useState<AnalysisReport | null>(null);
 
-  const canSubmit = !!activeAddress && target.trim().length > 0 && !loading;
+  // isReady is false on both the server and the client's first paint - the
+  // wallet manager restores a persisted session asynchronously after mount,
+  // so gating on it (rather than just activeAddress) keeps the first client
+  // render identical to the server's and avoids a hydration mismatch once
+  // the real session is restored. Same fix as WalletConnect.
+  const canSubmit =
+    isReady && !!activeAddress && target.trim().length > 0 && !loading;
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -76,86 +76,63 @@ export default function AppPage() {
     }
   }
 
-  return (
-    <>
-      <Nav />
-      <main className="mx-auto max-w-3xl px-6 py-16">
-        <h1 className="text-3xl font-semibold tracking-tight">
-          Run a validation
-        </h1>
-        <p className="mt-3 text-sm leading-relaxed text-neutral-400">
-          Connect a testnet Algorand wallet, enter a domain, and pay per
-          request in USDC. No account needed.
-        </p>
+  const selectedTier = TIERS.find((t) => t.id === tier) ?? TIERS[0];
 
-        {!activeAddress ? (
-          <div className="mt-8 flex items-center gap-4 rounded-xl border border-amber-400/20 bg-amber-400/5 p-4 text-sm text-amber-200">
-            <span>Connect a wallet to continue.</span>
-            <WalletConnect />
-          </div>
+  return (
+    <div className="flex min-h-screen flex-col">
+      <SiteHeader />
+
+      <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col items-center px-4 py-16 sm:px-6 sm:py-24">
+        <div className="w-full max-w-2xl text-center">
+          <h1 className="text-3xl font-semibold tracking-tight text-balance sm:text-4xl">
+            Validate any startup in seconds
+          </h1>
+          <p className="mx-auto mt-3 max-w-lg text-balance text-sm text-muted-foreground sm:text-base">
+            Enter a domain, pick a tier, and get a deterministic,
+            evidence-backed report. Paid per call, settled on Algorand.
+          </p>
+        </div>
+
+        <div className="mt-8 w-full max-w-2xl">
+          <ValidateForm
+            target={target}
+            onTargetChange={setTarget}
+            tier={tier}
+            onTierChange={setTier}
+            onSubmit={handleSubmit}
+            loading={loading}
+            statusLabel={status}
+            canSubmit={canSubmit}
+          />
+        </div>
+
+        {isReady && !activeAddress ? (
+          <p className="mt-4 text-sm text-muted-foreground">
+            Connect a wallet from the top right to run a{' '}
+            {selectedTier.label.toLowerCase()}.
+          </p>
         ) : null}
 
-        <form onSubmit={handleSubmit} className="mt-8 space-y-5">
-          <div>
-            <label
-              htmlFor="target"
-              className="block text-sm font-medium text-neutral-300"
-            >
-              Domain
-            </label>
-            <input
-              id="target"
-              type="text"
-              placeholder="stripe.com"
-              value={target}
-              onChange={(e) => setTarget(e.target.value)}
-              className="mt-2 w-full rounded-lg border border-white/10 bg-black px-4 py-2.5 text-sm text-neutral-100 outline-none focus:border-emerald-400/50"
-            />
-          </div>
-
-          <div className="flex gap-3">
-            {TIERS.map((t) => (
-              <button
-                key={t.id}
-                type="button"
-                onClick={() => setTier(t.id)}
-                className={`flex-1 rounded-xl border p-4 text-left transition ${
-                  tier === t.id
-                    ? 'border-emerald-400/50 bg-emerald-400/5'
-                    : 'border-white/10 hover:border-white/20'
-                }`}
-              >
-                <div className="text-sm font-medium text-neutral-100">
-                  {t.label}
-                </div>
-                <div className="text-xs text-neutral-500">{t.price}</div>
-              </button>
-            ))}
-          </div>
-
-          <button
-            type="submit"
-            disabled={!canSubmit}
-            className="w-full rounded-full bg-emerald-400 px-5 py-2.5 text-sm font-medium text-neutral-950 transition hover:bg-emerald-300 disabled:cursor-not-allowed disabled:opacity-40"
-          >
-            {loading
-              ? (status ?? 'Working…')
-              : `Validate for ${TIERS.find((t) => t.id === tier)?.price}`}
-          </button>
-        </form>
-
         {error ? (
-          <div className="mt-6 rounded-xl border border-red-400/20 bg-red-400/5 p-4 text-sm text-red-300">
-            {error}
+          <div
+            role="alert"
+            className="mt-6 flex w-full max-w-2xl items-start gap-2.5 rounded-2xl border border-destructive/30 bg-destructive/10 p-4 text-sm text-destructive"
+          >
+            <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
+            <span>{error}</span>
           </div>
         ) : null}
 
         {report ? (
-          <div className="mt-10">
+          <div className="mt-10 w-full max-w-4xl">
             <ReportView report={report} />
           </div>
         ) : null}
       </main>
-    </>
+
+      <footer className="border-t border-border py-6 text-center text-xs text-muted-foreground">
+        v1
+      </footer>
+    </div>
   );
 }

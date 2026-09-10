@@ -1,3 +1,137 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss';
+@import 'tw-animate-css';
+
+@custom-variant dark (&:is(.dark *));
+
+/*
+ * Validex theme tokens, derived from the brand palette:
+ *   #e9e9e8 (paper)  #381724 (wine)  #4a8bb5 (steel blue)
+ * Light mode is the primary experience; dark mode inverts onto the wine
+ * tone so the same palette holds up in both. Values stay as bare HSL
+ * triplets so `hsl(var(--x))` composes cleanly with Tailwind's opacity
+ * modifiers (bg-primary/90, etc.) via color-mix().
+ */
+@theme inline {
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+
+  --color-popover: hsl(var(--popover));
+  --color-popover-foreground: hsl(var(--popover-foreground));
+
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+
+  --color-success: hsl(var(--success));
+  --color-success-foreground: hsl(var(--success-foreground));
+
+  --color-warning: hsl(var(--warning));
+  --color-warning-foreground: hsl(var(--warning-foreground));
+
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+
+  --radius-lg: var(--radius);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-sm: calc(var(--radius) - 4px);
+
+  --font-sans: var(--font-outfit), ui-sans-serif, system-ui, sans-serif;
+}
+
+:root {
+  --background: 60 2% 91%;
+  --foreground: 336 42% 15%;
+
+  --card: 0 0% 100%;
+  --card-foreground: 336 42% 15%;
+
+  --popover: 0 0% 100%;
+  --popover-foreground: 336 42% 15%;
+
+  --primary: 204 42% 50%;
+  --primary-foreground: 0 0% 100%;
+
+  --secondary: 204 25% 93%;
+  --secondary-foreground: 336 30% 20%;
+
+  --muted: 60 6% 87%;
+  --muted-foreground: 336 12% 38%;
+
+  --accent: 204 30% 90%;
+  --accent-foreground: 336 42% 15%;
+
+  --destructive: 6 65% 48%;
+  --destructive-foreground: 0 0% 100%;
+
+  --success: 152 45% 34%;
+  --success-foreground: 0 0% 100%;
+
+  --warning: 38 75% 46%;
+  --warning-foreground: 0 0% 100%;
+
+  --border: 336 15% 86%;
+  --input: 336 15% 86%;
+  --ring: 204 42% 50%;
+
+  --radius: 0.85rem;
+}
+
+.dark {
+  --background: 336 42% 13%;
+  --foreground: 60 2% 91%;
+
+  --card: 336 34% 18%;
+  --card-foreground: 60 2% 91%;
+
+  --popover: 336 34% 18%;
+  --popover-foreground: 60 2% 91%;
+
+  --primary: 204 48% 58%;
+  --primary-foreground: 336 42% 12%;
+
+  --secondary: 336 24% 24%;
+  --secondary-foreground: 60 2% 91%;
+
+  --muted: 336 20% 22%;
+  --muted-foreground: 60 5% 65%;
+
+  --accent: 336 24% 26%;
+  --accent-foreground: 60 2% 91%;
+
+  --destructive: 6 55% 45%;
+  --destructive-foreground: 0 0% 100%;
+
+  --success: 152 40% 45%;
+  --success-foreground: 0 0% 100%;
+
+  --warning: 38 70% 52%;
+  --warning-foreground: 336 42% 12%;
+
+  --border: 336 20% 26%;
+  --input: 336 20% 26%;
+  --ring: 204 48% 58%;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}

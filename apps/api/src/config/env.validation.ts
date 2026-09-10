@@ -17,7 +17,15 @@ export const envValidationSchema = Joi.object({
     then: Joi.required(),
     otherwise: Joi.optional().allow(''),
   }),
-  ALGO_MAINNET_USDC_ASSET_ID: Joi.number().default(31566704),
+  // Kept as a string (not Joi.number()) even though it's numeric on-chain -
+  // @x402/core's PaymentRequirements.asset is typed `string`, and the
+  // AlgorandConfigService.usdcAssetId contract downstream is also `string`.
+  // Joi.number() would coerce this at validation time despite the string
+  // type annotation, silently turning "asset" into a JSON number on the
+  // wire - the facilitator's string comparison against the decoded
+  // transaction's asset ID then fails despite both sides being the same
+  // value ("expected 10458941, got 10458941").
+  ALGO_MAINNET_USDC_ASSET_ID: Joi.string().default('31566704'),
   ALGO_MAINNET_FACILITATOR_URL: Joi.string().when('NETWORK', {
     is: 'mainnet',
     then: Joi.required(),
@@ -30,7 +38,7 @@ export const envValidationSchema = Joi.object({
     then: Joi.required(),
     otherwise: Joi.optional().allow(''),
   }),
-  ALGO_TESTNET_USDC_ASSET_ID: Joi.number().default(10458941),
+  ALGO_TESTNET_USDC_ASSET_ID: Joi.string().default('10458941'),
   ALGO_TESTNET_FACILITATOR_URL: Joi.string().when('NETWORK', {
     is: 'testnet',
     then: Joi.required(),
