@@ -1,0 +1,49 @@
+# Dependencies – rebuilt inside the image
+node_modules/
+**/node_modules/
+.pnpm-store/
+
+# Build artifacts – produced inside the image
+dist/
+build/
+.next/
+out/
+apps/api/dist/
+apps/web/.next/
+
+# Prisma generated client – regenerated inside the image
+**/src/generated/
+
+# Environment – NEVER bake secrets into the image
+.env
+.env.*
+!.env.example
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Git
+.git/
+.gitignore
+
+# Tests & coverage
+coverage/
+**/*.spec.ts
+**/*.test.ts
+
+# TypeScript build info
+*.tsbuildinfo
+.turbo/
+
+# Web app – not built in this Dockerfile
+apps/web/

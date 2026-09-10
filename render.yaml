@@ -1,10 +1,9 @@
 services:
   - type: web
     name: validex-api
-    runtime: node
-    rootDir: .
-    buildCommand: pnpm install --frozen-lockfile && pnpm --filter api build
-    startCommand: node apps/api/dist/main.js
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
     healthCheckPath: /v1/health
     envVars:
       - key: DATABASE_URL
