@@ -67,8 +67,10 @@ describe('AiService', () => {
       ],
       riskFlags: ['Minor header omission'],
       categoryNarrative: {
-        security: 'Strong cryptographic controls with minor header adjustments possible.',
-        trust: 'Established operational track record with valid legal disclosures.',
+        security:
+          'Strong cryptographic controls with minor header adjustments possible.',
+        trust:
+          'Established operational track record with valid legal disclosures.',
       },
     };
 
@@ -95,8 +97,10 @@ describe('AiService', () => {
       ],
       riskFlags: ['Minor header omission'],
       categoryNarrative: {
-        security: 'Strong cryptographic controls with minor header adjustments possible.',
-        trust: 'Established operational track record with valid legal disclosures.',
+        security:
+          'Strong cryptographic controls with minor header adjustments possible.',
+        trust:
+          'Established operational track record with valid legal disclosures.',
       },
     });
   });
@@ -115,20 +119,28 @@ describe('AiService', () => {
       status: 200,
       data: {
         choices: [
-          { message: { content: '```json\n' + JSON.stringify(aiResponse) + '\n```' } },
+          {
+            message: {
+              content: '```json\n' + JSON.stringify(aiResponse) + '\n```',
+            },
+          },
         ],
       },
     });
 
     const result = await service.generateVerdict(mockPayload);
     expect(result.executiveSummary).toBe('Solid architecture.');
-    expect(result.insights).toEqual(['Clear separation of trust and security.']);
+    expect(result.insights).toEqual([
+      'Clear separation of trust and security.',
+    ]);
     expect(result.suggestions).toEqual(['Add CAA record.']);
     expect(result.opportunities).toEqual(['Expand open API documentation.']);
   });
 
   it('returns NULL_VERDICT gracefully on network failure without throwing', async () => {
-    mockedAxios.post.mockRejectedValueOnce(new Error('Network connection timeout'));
+    mockedAxios.post.mockRejectedValueOnce(
+      new Error('Network connection timeout'),
+    );
 
     const result = await service.generateVerdict(mockPayload);
     expect(result).toEqual({

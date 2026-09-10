@@ -25,8 +25,7 @@ describe('Bazaar Discovery Extension Validation', () => {
     network: 'testnet',
     caip2Network: 'algorand:wGZy2uoIUjFZwc7F36VfRTBHERncKxDb',
     usdcAssetId: '10458941',
-    walletAddress:
-      'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAY5HFKQ',
+    walletAddress: 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAY5HFKQ',
   } as any;
 
   let service: X402Service;

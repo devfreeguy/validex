@@ -73,7 +73,10 @@ function stripCodeFence(content: string): string {
 function parseStringArray(val: unknown): string[] | null {
   if (!Array.isArray(val)) return null;
   const filtered = val
-    .filter((item): item is string => typeof item === 'string' && item.trim().length > 0)
+    .filter(
+      (item): item is string =>
+        typeof item === 'string' && item.trim().length > 0,
+    )
     .map((item) => item.trim());
   return filtered.length > 0 ? filtered : null;
 }
@@ -99,7 +102,10 @@ function parseVerdict(content: string): AIVerdict | null {
       !Array.isArray(parsed.categoryNarrative)
         ? Object.fromEntries(
             Object.entries(parsed.categoryNarrative as Record<string, unknown>)
-              .filter(([, v]) => typeof v === 'string' && (v as string).trim().length > 0)
+              .filter(
+                ([, v]) =>
+                  typeof v === 'string' && (v as string).trim().length > 0,
+              )
               .map(([k, v]) => [k, (v as string).trim()]),
           )
         : null;
