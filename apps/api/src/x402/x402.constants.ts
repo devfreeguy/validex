@@ -70,42 +70,50 @@ export const TIER_BAZAAR_META: Record<
 > = {
   security: {
     serviceName: 'Validex Security Check',
-    description: 'TLS, headers, SPF, DMARC, MX.',
+    description:
+      'Audits SSL and TLS certificates, HTTP security headers such as HSTS and CSP, SPF, DMARC, MX email records, and DNS configuration.',
     tags: ['x402-global-challenge', 'security', 'validation'],
   },
   trust: {
     serviceName: 'Validex Trust Check',
-    description: 'HTTPS, domain age, privacy, terms.',
+    description:
+      'Evaluates HTTPS enforcement, domain registration age, WHOIS records, privacy policy, and terms of service documentation.',
     tags: ['x402-global-challenge', 'trust', 'validation'],
   },
   web: {
     serviceName: 'Validex Web Presence Check',
-    description: 'pricing, docs, blog, careers.',
+    description:
+      'Inspects online presence including pricing transparency, developer documentation, engineering blog, careers page, and contact channels.',
     tags: ['x402-global-challenge', 'web', 'validation'],
   },
   engineering: {
     serviceName: 'Validex Engineering Check',
-    description: 'GitHub activity, contributors, OSV.',
+    description:
+      'Analyzes public GitHub repository activity, commit frequency, contributor diversity, release cadence, and OSV known vulnerabilities.',
     tags: ['x402-global-challenge', 'engineering', 'validation'],
   },
   ai: {
     serviceName: 'Validex AI Analysis',
-    description: 'full analysis with AI verdict.',
+    description:
+      'Executes full multi-category validation with an AI-generated startup health verdict, risk factor analysis, and integration recommendations.',
     tags: ['x402-global-challenge', 'ai', 'validation', 'startup-health'],
   },
   compare: {
     serviceName: 'Validex Compare',
-    description: 'rank 2-5 companies by health.',
+    description:
+      'Performs comparative analysis and health ranking across 2 to 5 startup domains with relative scoring across all categories.',
     tags: ['x402-global-challenge', 'compare', 'validation'],
   },
   quick: {
     serviceName: 'Validex Quick Validation',
-    description: 'network checks + AI.',
+    description:
+      'Performs fast-path network connectivity, TLS certificate, security header, and domain trust validation combined with an AI summary.',
     tags: ['x402-global-challenge', 'validation', 'startup-health'],
   },
   full: {
     serviceName: 'Validex Full Validation',
-    description: 'all signals + AI, complete report.',
+    description:
+      'Conducts a deep audit across all six signal categories including security, trust, web, and engineering with full evidence and AI interpretation.',
     tags: ['x402-global-challenge', 'validation', 'startup-health'],
   },
 };

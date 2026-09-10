@@ -9,7 +9,7 @@ import {
 // only needs to change in one place.
 export const SERVICE_NAME = 'Validex';
 export const SERVICE_DESCRIPTION =
-  'Startup health and validation API for AI agents and developers';
+  'Startup health and validation API providing automated security, trust, web presence, and engineering analysis, individually or as a comprehensive report with AI interpretation.';
 
 function atomicUsdcToDollars(atomic: string): string {
   return `$${(Number(atomic) / 1_000_000).toFixed(2)}`;
@@ -24,9 +24,27 @@ export const TIER_PRICE_USD: Record<TierKey, string> = Object.fromEntries(
   ),
 ) as Record<TierKey, string>;
 
+export const TIER_SUMMARY: Record<TierKey, string> = Object.fromEntries(
+  (Object.keys(TIER_BAZAAR_META) as TierKey[]).map((tier) => [
+    tier,
+    TIER_BAZAAR_META[tier].description,
+  ]),
+) as Record<TierKey, string>;
+
+export const TIER_BODY_HINT: Record<TierKey, string> = {
+  security: 'Body: {"target": "..."}',
+  trust: 'Body: {"target": "..."}',
+  web: 'Body: {"target": "..."}',
+  engineering: 'Body: {"target": "..."}',
+  ai: 'Body: {"target": "..."}',
+  compare: 'Body: {"targets": ["...", "..."]}',
+  quick: 'Body: {"target": "..."}',
+  full: 'Body: {"target": "..."}',
+};
+
 export const TIER_DESCRIPTIONS: Record<TierKey, string> = Object.fromEntries(
   (Object.keys(TIER_BAZAAR_META) as TierKey[]).map((tier) => [
     tier,
-    `${TIER_BAZAAR_META[tier].description} ${TIER_PRICE_USD[tier]} per call.`,
+    `${TIER_SUMMARY[tier]} ${TIER_PRICE_USD[tier]}. ${TIER_BODY_HINT[tier]}`,
   ]),
 ) as Record<TierKey, string>;

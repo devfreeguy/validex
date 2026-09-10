@@ -6,6 +6,7 @@ import {
   SERVICE_NAME,
   TIER_DESCRIPTIONS,
   TIER_PRICE_USD,
+  TIER_SUMMARY,
 } from './well-known.constants';
 import { originOf } from './origin.util';
 import { solidColorPng } from './png.util';
@@ -87,7 +88,7 @@ export class RootDiscoveryController {
       ...tiers.flatMap((tier) => [
         `### POST ${origin}/v1/validate/${tier} - ${TIER_PRICE_USD[tier]}`,
         '',
-        TIER_DESCRIPTIONS[tier],
+        TIER_SUMMARY[tier],
         '',
         tier === 'compare'
           ? 'Request body: { "targets": ["example.com", "other.com"] } (2-5 domains)'
@@ -128,7 +129,7 @@ Unconditional pricing (no round trip needed) is at [\`/.well-known/x402\`](${ori
 
 ## Endpoints
 
-${tiers.map((tier) => `- \`POST ${origin}/v1/validate/${tier}\` (${TIER_PRICE_USD[tier]}) - ${TIER_DESCRIPTIONS[tier]}`).join('\n')}
+${tiers.map((tier) => `- \`POST ${origin}/v1/validate/${tier}\` (${TIER_PRICE_USD[tier]}) - ${TIER_SUMMARY[tier]}`).join('\n')}
 
 ## Notes
 
@@ -183,7 +184,7 @@ ${tiers.map((tier) => `- \`POST ${origin}/v1/validate/${tier}\` (${TIER_PRICE_US
           {
             post: {
               operationId: `validate${tier[0].toUpperCase()}${tier.slice(1)}`,
-              summary: TIER_DESCRIPTIONS[tier],
+              summary: TIER_SUMMARY[tier],
               requestBody: {
                 required: true,
                 content: {

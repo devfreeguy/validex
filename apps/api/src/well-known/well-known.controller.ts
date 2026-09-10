@@ -10,6 +10,7 @@ import {
   SERVICE_DESCRIPTION,
   SERVICE_NAME,
   TIER_DESCRIPTIONS,
+  TIER_SUMMARY,
 } from './well-known.constants';
 import { originOf } from './origin.util';
 
@@ -46,6 +47,9 @@ export class WellKnownController {
         asset: this.algorandConfig.usdcAssetId,
         amount: TIER_PRICE_ATOMIC[tier],
         payTo: this.algorandConfig.walletAddress,
+        extra: {
+          tag: 'x402-global-challenge',
+        },
       })),
     };
   }
@@ -67,8 +71,8 @@ export class WellKnownController {
       skills: tiers.map((tier) => ({
         id: `validate-${tier}`,
         name: TIER_BAZAAR_META[tier].serviceName,
-        description: TIER_DESCRIPTIONS[tier],
-        tags: ['x402', 'algorand', 'validation'],
+        description: TIER_SUMMARY[tier],
+        tags: ['x402', 'algorand', 'validation', 'x402-global-challenge'],
       })),
     };
   }
@@ -128,7 +132,7 @@ export class WellKnownController {
       version: '1.0.0',
       tools: tiers.map((tier) => ({
         name: `validate_${tier}`,
-        description: `${TIER_DESCRIPTIONS[tier]} Paid per call via x402 (Algorand USDC).`,
+        description: `${TIER_SUMMARY[tier]} Paid per call via x402 (Algorand USDC).`,
         endpoint: `${origin}/v1/validate/${tier}`,
         method: 'POST',
       })),
