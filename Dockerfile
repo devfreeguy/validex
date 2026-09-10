@@ -49,18 +49,9 @@ RUN cd /deploy/api && \
 # ─────────────────────────────────────────────
 # Stage 2: Build the NestJS application
 # ─────────────────────────────────────────────
-FROM node:22-alpine AS builder
+FROM deps AS builder
 
-RUN corepack enable && corepack prepare pnpm@11.15.1 --activate
-
-WORKDIR /repo
-
-# Reuse the full install from the deps stage (needed for nest-cli, ts-node, etc.)
-COPY --from=deps /repo/node_modules ./node_modules
-COPY --from=deps /repo/apps/api/node_modules ./apps/api/node_modules
-
-# Copy manifests and source code
-COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+# Copy source code
 COPY apps/api ./apps/api
 COPY packages/shared ./packages/shared
 
@@ -97,6 +88,9 @@ COPY --from=deps /deploy/api/package.json ./package.json
 
 # Compiled application output
 COPY --from=builder /repo/apps/api/dist ./dist
+
+# Prisma generated client source artifacts
+COPY --from=builder /repo/apps/api/src/generated ./src/generated
 
 # Prisma schema & migrations folder (needed at runtime for `prisma migrate deploy`)
 COPY --from=builder /repo/apps/api/prisma ./prisma
