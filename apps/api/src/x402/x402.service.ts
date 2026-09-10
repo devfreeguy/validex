@@ -113,12 +113,13 @@ export class X402Service implements OnModuleInit {
     // Every endpoint is individually discoverable with its own body schema -
     // all of them take a single `target` string except compare, which takes
     // a `targets` array (2-5 domains) instead.
-    const declaredExtensions =
+    const baseDeclared =
       tier === 'compare'
         ? declareDiscoveryExtension({
             bodyType: 'json',
             input: { targets: ['stripe.com', 'github.com'] },
             inputSchema: {
+              type: 'object',
               properties: {
                 targets: {
                   type: 'array',
@@ -135,15 +136,29 @@ export class X402Service implements OnModuleInit {
             bodyType: 'json',
             input: { target: 'stripe.com' },
             inputSchema: {
+              type: 'object',
               properties: { target: { type: 'string' } },
               required: ['target'],
             },
             output: { example: { success: true } },
           });
 
-    const origin = new URL(resourceUrl).origin;
+    const parsedUrl = new URL(resourceUrl);
+    const enrichFn = bazaarResourceServerExtension.enrichDeclaration;
+    const enrichedBazaar = enrichFn
+      ? enrichFn(baseDeclared.bazaar, {
+          method: 'POST',
+          url: resourceUrl,
+          adapter: {
+            getMethod: () => 'POST',
+            getPath: () => parsedUrl.pathname,
+          },
+        })
+      : baseDeclared.bazaar;
+
+    const origin = parsedUrl.origin;
     const extensions = {
-      ...declaredExtensions,
+      bazaar: enrichedBazaar,
       'x402-merchant': {
         info: {
           ...X402_MERCHANT_INFO,

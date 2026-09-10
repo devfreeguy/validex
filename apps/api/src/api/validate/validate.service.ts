@@ -443,6 +443,9 @@ export class ValidateService {
     const verdict: AnalysisVerdict = {
       recommendation,
       executiveSummary: aiVerdict?.executiveSummary ?? null,
+      insights: aiVerdict?.insights ?? null,
+      suggestions: aiVerdict?.suggestions ?? null,
+      opportunities: aiVerdict?.opportunities ?? null,
       riskFlags: aiVerdict?.riskFlags ?? null,
       categoryNarrative: aiVerdict?.categoryNarrative ?? null,
     };
@@ -455,7 +458,12 @@ export class ValidateService {
         meta,
         company,
         verdict,
-        summary: scoreSummary,
+        summary: {
+          ...scoreSummary,
+          ...(verdict.executiveSummary
+            ? { executiveSummary: verdict.executiveSummary }
+            : {}),
+        },
         categories: scoreReport.categories,
         validators: results,
         strengths: evidence.strengths,

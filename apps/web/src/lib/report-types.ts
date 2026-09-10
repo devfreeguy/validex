@@ -19,6 +19,18 @@ export interface ValidationResult {
   metadata?: Record<string, unknown>;
 }
 
+export type Recommendation = 'integrate' | 'caution' | 'avoid';
+
+export interface AnalysisVerdict {
+  recommendation: Recommendation;
+  executiveSummary: string | null;
+  insights: string[] | null;
+  suggestions: string[] | null;
+  opportunities: string[] | null;
+  riskFlags: string[] | null;
+  categoryNarrative: Record<string, string> | null;
+}
+
 export interface CategoryScore {
   score: number | null;
   confidence: number;
@@ -34,7 +46,7 @@ export interface AnalysisReport {
     algorithmVersion: string;
     generatedAt: string;
     cached: boolean;
-    tier: 'quick' | 'full';
+    tier: string;
   };
   company: {
     domain: string;
@@ -42,6 +54,7 @@ export interface AnalysisReport {
     companyName: string | null;
     githubRepo: string | null;
   };
+  verdict?: AnalysisVerdict;
   summary: {
     score: number | null;
     grade: string;

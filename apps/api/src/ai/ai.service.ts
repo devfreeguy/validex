@@ -18,12 +18,18 @@ export interface AIVerdictPayload {
 
 export interface AIVerdict {
   executiveSummary: string | null;
+  insights: string[] | null;
+  suggestions: string[] | null;
+  opportunities: string[] | null;
   riskFlags: string[] | null;
   categoryNarrative: Record<string, string> | null;
 }
 
 const NULL_VERDICT: AIVerdict = {
   executiveSummary: null,
+  insights: null,
+  suggestions: null,
+  opportunities: null,
   riskFlags: null,
   categoryNarrative: null,
 };
@@ -36,15 +42,15 @@ const SYSTEM_PROMPT =
   'pre-computed recommendation, respond with ONLY a single JSON object ' +
   '(no prose, no markdown fences) with exactly these keys: ' +
   '"executiveSummary" (a concise 3-5 sentence factual executive summary), ' +
-  '"riskFlags" (an array of 1-5 short strings naming the most important ' +
-  'risks, or an empty array if none), "categoryNarrative" (an object ' +
-  'mapping each category name given in the input to a 1-2 sentence ' +
-  'factual narrative about that category). Be factual and direct. Do not ' +
-  'invent information not present in the data. Do not speculate about ' +
-  'future performance. Describe only what the observable signals ' +
-  'indicate. The "recommendation" field in the input is fixed and already ' +
-  'decided - never contradict it, restate it as your own, or propose a ' +
-  'different one; write around it.';
+  '"insights" (an array of 2-5 concise analytical insights based on the evaluation signals), ' +
+  '"suggestions" (an array of 2-5 actionable suggestions or recommendations to address weaknesses and improve validation posture), ' +
+  '"opportunities" (an array of 1-4 strategic or engineering growth opportunities), ' +
+  '"riskFlags" (an array of 1-5 short strings naming the most important risks, or an empty array if none), ' +
+  '"categoryNarrative" (an object mapping each category name given in the input to a 1-2 sentence factual narrative about that category). ' +
+  'Be factual and direct. Do not invent information not present in the data. Do not speculate about ' +
+  'future performance. Describe only what the observable signals indicate. ' +
+  'The "recommendation" field in the input is fixed and already decided - never contradict it, ' +
+  'restate it as your own, or propose a different one; write around it.';
 
 interface GroqChatCompletionResponse {
   choices?: Array<{ message?: { content?: string } }>;
@@ -52,6 +58,9 @@ interface GroqChatCompletionResponse {
 
 interface ParsedVerdictJson {
   executiveSummary?: unknown;
+  insights?: unknown;
+  suggestions?: unknown;
+  opportunities?: unknown;
   riskFlags?: unknown;
   categoryNarrative?: unknown;
 }
@@ -59,6 +68,14 @@ interface ParsedVerdictJson {
 function stripCodeFence(content: string): string {
   const fenced = /^```(?:json)?\s*([\s\S]*?)\s*```$/.exec(content.trim());
   return fenced ? fenced[1] : content;
+}
+
+function parseStringArray(val: unknown): string[] | null {
+  if (!Array.isArray(val)) return null;
+  const filtered = val
+    .filter((item): item is string => typeof item === 'string' && item.trim().length > 0)
+    .map((item) => item.trim());
+  return filtered.length > 0 ? filtered : null;
 }
 
 function parseVerdict(content: string): AIVerdict | null {
@@ -71,11 +88,10 @@ function parseVerdict(content: string): AIVerdict | null {
         ? parsed.executiveSummary.trim()
         : null;
 
-    const riskFlags =
-      Array.isArray(parsed.riskFlags) &&
-      parsed.riskFlags.every((flag) => typeof flag === 'string')
-        ? (parsed.riskFlags as string[])
-        : null;
+    const insights = parseStringArray(parsed.insights);
+    const suggestions = parseStringArray(parsed.suggestions);
+    const opportunities = parseStringArray(parsed.opportunities);
+    const riskFlags = parseStringArray(parsed.riskFlags);
 
     const categoryNarrative =
       parsed.categoryNarrative &&
@@ -83,13 +99,30 @@ function parseVerdict(content: string): AIVerdict | null {
       !Array.isArray(parsed.categoryNarrative)
         ? Object.fromEntries(
             Object.entries(parsed.categoryNarrative as Record<string, unknown>)
-              .filter(([, v]) => typeof v === 'string')
-              .map(([k, v]) => [k, v as string]),
+              .filter(([, v]) => typeof v === 'string' && (v as string).trim().length > 0)
+              .map(([k, v]) => [k, (v as string).trim()]),
           )
         : null;
 
-    if (!executiveSummary && !riskFlags && !categoryNarrative) return null;
-    return { executiveSummary, riskFlags, categoryNarrative };
+    if (
+      !executiveSummary &&
+      !insights &&
+      !suggestions &&
+      !opportunities &&
+      !riskFlags &&
+      !categoryNarrative
+    ) {
+      return null;
+    }
+
+    return {
+      executiveSummary,
+      insights,
+      suggestions,
+      opportunities,
+      riskFlags,
+      categoryNarrative,
+    };
   } catch {
     return null;
   }

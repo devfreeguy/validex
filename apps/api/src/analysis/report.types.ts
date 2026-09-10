@@ -10,14 +10,17 @@ export type Recommendation = 'integrate' | 'caution' | 'avoid';
 /**
  * `recommendation` is always deterministic (derived from the overall score
  * by ValidateService.deriveRecommendation - never invented by the AI, which
- * only writes prose around it). `executiveSummary`/`riskFlags`/
- * `categoryNarrative` are null when Groq is unavailable/fails or the tier
- * doesn't run AI at all - the deterministic recommendation and full scores
- * are still always returned.
+ * only writes prose around it). `executiveSummary`/`insights`/`suggestions`/
+ * `opportunities`/`riskFlags`/`categoryNarrative` are null when Groq is
+ * unavailable/fails or the tier doesn't run AI at all - the deterministic
+ * recommendation and full scores are still always returned.
  */
 export interface AnalysisVerdict {
   recommendation: Recommendation;
   executiveSummary: string | null;
+  insights: string[] | null;
+  suggestions: string[] | null;
+  opportunities: string[] | null;
   riskFlags: string[] | null;
   categoryNarrative: Partial<Record<ValidatorCategory, string>> | null;
 }

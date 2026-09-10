@@ -165,6 +165,9 @@ const STANDARD_RESPONSE_SHAPE = `{
     "verdict": {                 // present on ai/quick/full only
       "recommendation": "integrate", // deterministic: score-derived, never AI-invented
       "executiveSummary": "...",     // null if Groq unavailable
+      "insights": ["..."],           // null if Groq unavailable
+      "suggestions": ["..."],        // null if Groq unavailable
+      "opportunities": ["..."],      // null if Groq unavailable
       "riskFlags": ["..."],          // null if Groq unavailable
       "categoryNarrative": { "security": "...", "trust": "..." } // null if Groq unavailable
     }
@@ -179,6 +182,9 @@ const AI_FORWARD_RESPONSE_SHAPE = `{
     "verdict": {
       "recommendation": "integrate",
       "executiveSummary": "...",
+      "insights": ["..."],
+      "suggestions": ["..."],
+      "opportunities": ["..."],
       "riskFlags": ["..."],
       "categoryNarrative": { "security": "...", "trust": "...", /* ... */ }
     },
@@ -243,7 +249,7 @@ const PAYMENT_REQUIRED_SHAPE = `{
 
 // The docs page keeps its original (pre-redesign) visual system for now -
 // only the main page has been rebuilt on shadcn/ui. Scoping it with `dark`
-// lets it keep rendering on the wine-dark background via the new design
+// lets it keep rendering on the dark background via the new design
 // tokens' dark palette instead of clashing with the new light default body,
 // while the header stays visually consistent with the rest of the app.
 export default function DocsPage() {
@@ -309,6 +315,9 @@ export default function DocsPage() {
             <code className="text-neutral-300">verdict</code> object (
             <code className="text-neutral-300">recommendation</code>,{' '}
             <code className="text-neutral-300">executiveSummary</code>,{' '}
+            <code className="text-neutral-300">insights</code>,{' '}
+            <code className="text-neutral-300">suggestions</code>,{' '}
+            <code className="text-neutral-300">opportunities</code>,{' '}
             <code className="text-neutral-300">riskFlags</code>,{' '}
             <code className="text-neutral-300">categoryNarrative</code>)
             appears before <code className="text-neutral-300">summary</code>{' '}

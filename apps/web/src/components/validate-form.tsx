@@ -18,6 +18,8 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { cn } from '@/lib/utils';
@@ -26,13 +28,13 @@ import { cn } from '@/lib/utils';
 // takes 2-5 targets instead of one, so it needs its own multi-domain input
 // and isn't offered from this single-target dropdown.
 export type Tier =
+  | 'quick'
+  | 'full'
+  | 'ai'
   | 'security'
   | 'trust'
   | 'web'
-  | 'engineering'
-  | 'ai'
-  | 'quick'
-  | 'full';
+  | 'engineering';
 
 export interface TierOption {
   id: Tier;
@@ -40,15 +42,46 @@ export interface TierOption {
   price: string;
   description: string;
   icon: typeof Zap;
+  group: 'AI Bundles' | 'Category Checks';
 }
 
 export const TIERS: TierOption[] = [
+  // Comprehensive & AI Bundles
+  {
+    id: 'quick',
+    label: 'Quick',
+    price: '$0.20',
+    description:
+      'Security and trust checks with AI analysis. Fast, network-level, no crawl.',
+    icon: Zap,
+    group: 'AI Bundles',
+  },
+  {
+    id: 'full',
+    label: 'Full',
+    price: '$0.35',
+    description: 'Every category with AI analysis. The complete report.',
+    icon: Layers,
+    group: 'AI Bundles',
+  },
+  {
+    id: 'ai',
+    label: 'AI Analysis',
+    price: '$0.15',
+    description:
+      'Full company analysis with AI verdict: recommendation, insights, suggestions, opportunities, and risk flags.',
+    icon: Sparkles,
+    group: 'AI Bundles',
+  },
+
+  // Atomic Category Checks
   {
     id: 'security',
     label: 'Security',
     price: '$0.05',
     description: 'TLS, security headers, SPF, DMARC, MX.',
     icon: ShieldCheck,
+    group: 'Category Checks',
   },
   {
     id: 'trust',
@@ -56,6 +89,7 @@ export const TIERS: TierOption[] = [
     price: '$0.05',
     description: 'HTTPS, domain age, privacy policy, terms, contact, about.',
     icon: FileText,
+    group: 'Category Checks',
   },
   {
     id: 'web',
@@ -63,6 +97,7 @@ export const TIERS: TierOption[] = [
     price: '$0.06',
     description: 'Pricing, documentation, blog, careers, changelog.',
     icon: Globe2,
+    group: 'Category Checks',
   },
   {
     id: 'engineering',
@@ -71,29 +106,7 @@ export const TIERS: TierOption[] = [
     description:
       'GitHub activity, contributors, release cadence, issues, PRs, vulnerabilities.',
     icon: Code2,
-  },
-  {
-    id: 'ai',
-    label: 'AI Analysis',
-    price: '$0.15',
-    description:
-      'Full company analysis with an AI verdict: recommendation, risk flags, category narrative.',
-    icon: Sparkles,
-  },
-  {
-    id: 'quick',
-    label: 'Quick',
-    price: '$0.20',
-    description:
-      'Security and trust checks with AI analysis. Fast, network-level, no crawl.',
-    icon: Zap,
-  },
-  {
-    id: 'full',
-    label: 'Full',
-    price: '$0.35',
-    description: 'Every category with AI analysis. The complete report.',
-    icon: Layers,
+    group: 'Category Checks',
   },
 ];
 
@@ -156,7 +169,41 @@ export function ValidateForm({
               align="end"
               className="w-72 max-h-[min(20rem,var(--radix-dropdown-menu-content-available-height))] overflow-y-auto"
             >
-              {TIERS.map((option) => (
+              <DropdownMenuLabel className="px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                AI Bundles
+              </DropdownMenuLabel>
+              {TIERS.filter((o) => o.group === 'AI Bundles').map((option) => (
+                <DropdownMenuItem
+                  key={option.id}
+                  onSelect={() => onTierChange(option.id)}
+                  className={cn(
+                    'flex items-start gap-3 py-2.5',
+                    option.id === tier && 'bg-accent',
+                  )}
+                >
+                  <option.icon className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+                  <div className="flex-1">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="font-medium text-foreground">
+                        {option.label}
+                      </span>
+                      <span className="text-sm text-muted-foreground">
+                        {option.price}
+                      </span>
+                    </div>
+                    <p className="mt-0.5 text-xs text-muted-foreground">
+                      {option.description}
+                    </p>
+                  </div>
+                </DropdownMenuItem>
+              ))}
+
+              <DropdownMenuSeparator />
+
+              <DropdownMenuLabel className="px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                Category Checks
+              </DropdownMenuLabel>
+              {TIERS.filter((o) => o.group === 'Category Checks').map((option) => (
                 <DropdownMenuItem
                   key={option.id}
                   onSelect={() => onTierChange(option.id)}

@@ -13,13 +13,18 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { cn } from '@/lib/utils';
 import { network } from '@/lib/wallet-manager';
 
 function truncate(address: string): string {
   return `${address.slice(0, 6)}…${address.slice(-4)}`;
 }
 
-export function WalletConnect() {
+interface WalletConnectProps {
+  className?: string;
+}
+
+export function WalletConnect({ className }: WalletConnectProps = {}) {
   const { wallets, activeWallet, activeAddress, isReady } = useWallet();
   const [connecting, setConnecting] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
@@ -44,7 +49,7 @@ export function WalletConnect() {
     return (
       <DropdownMenu onOpenChange={() => setCopied(false)}>
         <DropdownMenuTrigger asChild>
-          <Button variant="secondary" size="sm" className="gap-2">
+          <Button variant="secondary" className={cn("gap-2", className)}>
             <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-success" />
             {truncate(activeAddress)}
           </Button>
@@ -84,7 +89,7 @@ export function WalletConnect() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button size="sm" className="gap-2">
+        <Button className={cn("gap-2", className)}>
           <Wallet className="h-4 w-4" />
           Connect wallet
         </Button>
