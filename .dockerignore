@@ -45,5 +45,6 @@ coverage/
 *.tsbuildinfo
 .turbo/
 
-# Web app – not built in this Dockerfile
-apps/web/
+# Web app – not built in this Dockerfile, but package.json needed for workspace graph
+apps/web/**
+!apps/web/package.json

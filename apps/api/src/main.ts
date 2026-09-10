@@ -157,6 +157,8 @@ async function bootstrap(): Promise<void> {
     }),
   );
 
+  app.enableShutdownHooks();
+
   // X402Service.onModuleInit (registers the AVM scheme and fetches the
   // facilitator's supported kinds) must have run before the hook below can
   // build payment requirements, so the app must be fully initialized first.

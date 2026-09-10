@@ -1,4 +1,5 @@
 import { Injectable, Logger, OnModuleDestroy } from '@nestjs/common';
+import { existsSync } from 'node:fs';
 import { chromium, type Browser } from 'playwright';
 
 export interface PageContent {
@@ -23,8 +24,15 @@ export class PlaywrightService implements OnModuleDestroy {
 
   async launch(): Promise<Browser> {
     if (!this.browserPromise) {
+      const executablePath =
+        process.env.CHROMIUM_EXECUTABLE_PATH ??
+        (process.platform === 'linux' && existsSync('/usr/bin/chromium')
+          ? '/usr/bin/chromium'
+          : undefined);
+
       this.browserPromise = chromium.launch({
         headless: true,
+        ...(executablePath ? { executablePath } : {}),
         args: ['--no-sandbox', '--disable-dev-shm-usage'],
       });
     }
