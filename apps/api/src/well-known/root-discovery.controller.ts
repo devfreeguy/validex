@@ -4,7 +4,6 @@ import { TIER_PRICE_ATOMIC, TierKey } from '@/x402/x402.constants';
 import {
   SERVICE_DESCRIPTION,
   SERVICE_NAME,
-  TIER_DESCRIPTIONS,
   TIER_PRICE_USD,
   TIER_SUMMARY,
 } from './well-known.constants';

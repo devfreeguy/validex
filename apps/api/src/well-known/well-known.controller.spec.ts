@@ -11,8 +11,7 @@ describe('WellKnownController', () => {
   const mockAlgorandConfig = {
     caip2Network: 'algorand:wGHE2Pwdvd7S12BL5FaOP20EGYesN73ktiC1qzkkit8=',
     usdcAssetId: '31566704',
-    walletAddress:
-      '2URXEDGOHVIZYKUPRQGTCFOXJMVRZYUZLLOVX3KWYMB76CAZNOUBYSRM2Q',
+    walletAddress: '2URXEDGOHVIZYKUPRQGTCFOXJMVRZYUZLLOVX3KWYMB76CAZNOUBYSRM2Q',
     network: 'mainnet',
     facilitatorUrl: 'https://facilitator.goplausible.xyz',
   } as unknown as AlgorandConfigService;
