@@ -41,7 +41,7 @@ jobs:
         run: pnpm --filter api build
 
       - name: Test
-        run: pnpm --filter api test -- --passWithNoTests
+        run: pnpm --filter api test
 
   build-and-push:
     name: Build & push images
