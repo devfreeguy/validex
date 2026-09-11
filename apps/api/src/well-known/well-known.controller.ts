@@ -10,6 +10,7 @@ import {
   SERVICE_DESCRIPTION,
   SERVICE_NAME,
   TIER_DESCRIPTIONS,
+  TIER_PRICE_USD,
   TIER_SUMMARY,
 } from './well-known.constants';
 import { originOf } from './origin.util';
@@ -68,11 +69,66 @@ export class WellKnownController {
       capabilities: { streaming: false },
       defaultInputModes: ['application/json'],
       defaultOutputModes: ['application/json'],
+      // x402 v2 on Algorand USDC is the payment mechanism - agents must
+      // acquire payment requirements from /.well-known/x402 or from the
+      // 402 response before calling any skill endpoint.
+      authentication: {
+        type: 'x402',
+        protocol: 'x402',
+        version: 2,
+        network: 'algorand',
+        asset: 'USDC',
+        pricingManifest: `${origin}/.well-known/x402`,
+        paymentHeader: 'PAYMENT-SIGNATURE',
+        description:
+          'Call without PAYMENT-SIGNATURE to receive a 402 with PAYMENT-REQUIRED header. Sign against those requirements and retry with the signature on PAYMENT-SIGNATURE.',
+      },
       skills: tiers.map((tier) => ({
         id: `validate-${tier}`,
         name: TIER_BAZAAR_META[tier].serviceName,
         description: TIER_SUMMARY[tier],
         tags: ['x402', 'algorand', 'validation', 'x402-global-challenge'],
+        // inputSchema lets tool-calling agents construct valid requests
+        // without consulting external documentation.
+        inputSchema:
+          tier === 'compare'
+            ? {
+                type: 'object',
+                required: ['targets'],
+                properties: {
+                  targets: {
+                    type: 'array',
+                    items: { type: 'string' },
+                    minItems: 2,
+                    maxItems: 5,
+                    description:
+                      'Array of 2-5 bare domains or full URLs to compare.',
+                    example: ['stripe.com', 'github.com'],
+                  },
+                  refresh: {
+                    type: 'boolean',
+                    default: false,
+                    description: 'Bypass validator result cache when true.',
+                  },
+                },
+              }
+            : {
+                type: 'object',
+                required: ['target'],
+                properties: {
+                  target: {
+                    type: 'string',
+                    description:
+                      'Bare domain or full URL of the startup to validate (e.g. "stripe.com").',
+                    example: 'stripe.com',
+                  },
+                  refresh: {
+                    type: 'boolean',
+                    default: false,
+                    description: 'Bypass validator result cache when true.',
+                  },
+                },
+              },
       })),
     };
   }
@@ -120,7 +176,8 @@ export class WellKnownController {
   // MCP tool manifest. No live MCP transport (SSE/stdio) is exposed yet, so
   // this deliberately omits a `transport` block rather than advertise one
   // that would 404 - each tool instead links straight to the real HTTP
-  // endpoint it maps to.
+  // endpoint it maps to. inputSchema is included per tool so an MCP client
+  // can construct a valid request body without consulting separate docs.
   @Get('mcp.json')
   getMcpManifest(@Req() request: FastifyRequest) {
     const origin = originOf(request);
@@ -132,9 +189,48 @@ export class WellKnownController {
       version: '1.0.0',
       tools: tiers.map((tier) => ({
         name: `validate_${tier}`,
-        description: `${TIER_SUMMARY[tier]} Paid per call via x402 (Algorand USDC).`,
+        description: `${TIER_SUMMARY[tier]} Paid per call via x402 (Algorand USDC). Price: ${TIER_PRICE_USD[tier]}.`,
         endpoint: `${origin}/v1/validate/${tier}`,
         method: 'POST',
+        inputSchema:
+          tier === 'compare'
+            ? {
+                type: 'object',
+                required: ['targets'],
+                properties: {
+                  targets: {
+                    type: 'array',
+                    items: { type: 'string' },
+                    minItems: 2,
+                    maxItems: 5,
+                    description:
+                      'Array of 2-5 bare domains or full URLs to compare.',
+                    example: ['stripe.com', 'github.com'],
+                  },
+                  refresh: {
+                    type: 'boolean',
+                    default: false,
+                    description: 'Bypass validator result cache when true.',
+                  },
+                },
+              }
+            : {
+                type: 'object',
+                required: ['target'],
+                properties: {
+                  target: {
+                    type: 'string',
+                    description:
+                      'Bare domain or full URL of the startup to validate (e.g. "stripe.com").',
+                    example: 'stripe.com',
+                  },
+                  refresh: {
+                    type: 'boolean',
+                    default: false,
+                    description: 'Bypass validator result cache when true.',
+                  },
+                },
+              },
       })),
     };
   }

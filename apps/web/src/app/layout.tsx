@@ -10,11 +10,43 @@ const outfit = Outfit({
   display: 'swap',
 });
 
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000';
+
+const APP_TITLE = 'Validex';
+const APP_DESCRIPTION =
+  'Validate any startup in seconds. Validex runs security, trust, engineering, and product checks on any company domain and returns a deterministic score, letter grade, and evidence-backed report. Pay per analysis via x402 on Algorand.';
+
 export const metadata: Metadata = {
-  title: 'Validex - Startup health validation for AI agents',
-  description:
-    'Pay-per-call startup validation API. One request, a deterministic score, evidence-backed. Settled on Algorand via x402.',
+  metadataBase: new URL(APP_URL),
+  title: {
+    default: APP_TITLE,
+    template: `%s · ${APP_TITLE}`,
+  },
+  description: APP_DESCRIPTION,
+  openGraph: {
+    type: 'website',
+    siteName: APP_TITLE,
+    title: APP_TITLE,
+    description: APP_DESCRIPTION,
+    url: APP_URL,
+    images: [
+      {
+        url: '/og-image.png',
+        width: 1200,
+        height: 630,
+        type: 'image/png',
+        alt: 'Validex — startup validation for AI agents and developers',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: APP_TITLE,
+    description: APP_DESCRIPTION,
+    images: ['/og-image.png'],
+  },
 };
+
 
 export default function RootLayout({
   children,

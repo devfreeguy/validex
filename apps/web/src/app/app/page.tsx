@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useWallet } from '@txnlab/use-wallet-react';
 import { AlertCircle } from 'lucide-react';
 import { SiteHeader } from '@/components/site-header';
+import { SiteFooter } from '@/components/site-footer';
 import { ReportView } from '@/components/report-view';
 import { ValidateForm, TIERS, type Tier } from '@/components/validate-form';
 import { createPaidApiClient } from '@/lib/x402-client';
@@ -130,9 +131,7 @@ export default function ValidatePage() {
         ) : null}
       </main>
 
-      <footer className="border-t border-border py-6 text-center text-xs text-muted-foreground">
-        v1
-      </footer>
+      <SiteFooter />
     </div>
   );
 }

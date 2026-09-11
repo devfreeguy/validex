@@ -19,7 +19,18 @@ export function HeroSection() {
         />
       </div>
 
-      <div className="relative z-10 mx-auto max-w-4xl">
+      <div className="relative z-10 mx-auto flex max-w-4xl flex-col items-center">
+        <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3.5 py-1.5 text-xs font-medium text-white/90 backdrop-blur-md shadow-sm">
+          <Image
+            src="/algorand.svg"
+            alt="Algorand"
+            width={16}
+            height={16}
+            className="h-4 w-4 shrink-0"
+          />
+          <span>Built for the x402 Global Challenge</span>
+        </div>
+
         <h1 className="text-4xl font-semibold tracking-tight text-balance text-white drop-shadow-md sm:text-5xl lg:text-6xl">
           Startup validation, callable by anyone or anything.
         </h1>

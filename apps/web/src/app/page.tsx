@@ -12,10 +12,35 @@ import {
 } from '@/components/landing';
 
 export const metadata: Metadata = {
-  title: 'Validex - Startup health validation for AI agents',
+  title: 'Startup Validation for AI Agents & Developers',
   description:
-    'Pay-per-call startup validation API. Deterministic, evidence-backed reports on security, trust, engineering, and product signals. Settled on Algorand via x402.',
+    'Validex scores any startup domain across security, trust, engineering, and product signals. Deterministic, evidence-backed reports. Pay per call via x402 on Algorand.',
+  openGraph: {
+    type: 'website',
+    siteName: 'Validex',
+    title: 'Validex — Startup Validation for AI Agents & Developers',
+    description:
+      'Validex scores any startup domain across security, trust, engineering, and product signals. Deterministic, evidence-backed reports. Pay per call via x402 on Algorand.',
+    images: [
+      {
+        url: '/og-image.png',
+        width: 1200,
+        height: 630,
+        type: 'image/png',
+        alt: 'Validex — startup validation for AI agents and developers',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Validex — Startup Validation for AI Agents & Developers',
+    description:
+      'Validex scores any startup domain across security, trust, engineering, and product signals. Deterministic, evidence-backed reports. Pay per call via x402 on Algorand.',
+    images: ['/og-image.png'],
+  },
 };
+
+
 
 export default function LandingPage() {
   return (

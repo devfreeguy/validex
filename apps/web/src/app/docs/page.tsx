@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { SiteHeader } from '@/components/site-header';
+import { SiteFooter } from '@/components/site-footer';
 
 export const metadata: Metadata = {
   title: 'Docs - Validex',
@@ -10,7 +11,7 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3000';
 
 function CodeBlock({ children }: { children: string }) {
   return (
-    <pre className="overflow-x-auto rounded-xl border border-white/10 bg-black p-5 text-sm text-neutral-300">
+    <pre className="overflow-x-auto rounded-xl border border-border bg-secondary p-4 text-xs font-mono leading-relaxed text-foreground sm:p-5 sm:text-sm">
       <code>{children}</code>
     </pre>
   );
@@ -28,23 +29,23 @@ function Endpoint({
   children: React.ReactNode;
 }) {
   return (
-    <section className="border-t border-white/10 py-10">
+    <section className="border-t border-border py-10">
       <div className="flex flex-wrap items-center gap-3">
-        <span className="rounded-md bg-emerald-400/10 px-2 py-1 font-mono text-xs font-medium text-emerald-400">
+        <span className="rounded-md bg-emerald-500/10 px-2 py-1 font-mono text-xs font-semibold text-emerald-600 dark:text-emerald-400">
           {method}
         </span>
-        <code className="text-base text-neutral-100">{path}</code>
+        <code className="text-base font-semibold text-foreground">{path}</code>
         {paid ? (
-          <span className="rounded-full border border-amber-400/30 px-2 py-0.5 text-xs text-amber-400">
+          <span className="rounded-full border border-amber-500/30 bg-amber-500/10 px-2.5 py-0.5 text-xs font-medium text-amber-600 dark:text-amber-400">
             requires payment
           </span>
         ) : (
-          <span className="rounded-full border border-white/15 px-2 py-0.5 text-xs text-neutral-500">
+          <span className="rounded-full border border-border px-2.5 py-0.5 text-xs text-muted-foreground">
             free
           </span>
         )}
       </div>
-      <div className="mt-4 space-y-4 text-sm leading-relaxed text-neutral-400">
+      <div className="mt-4 space-y-4 text-sm leading-relaxed text-muted-foreground">
         {children}
       </div>
     </section>
@@ -73,20 +74,20 @@ function PricingTable() {
     <div className="mt-4 overflow-x-auto">
       <table className="w-full min-w-[28rem] text-sm">
         <thead>
-          <tr className="border-b border-white/10 text-left text-neutral-500">
-            <th className="py-2 pr-4 font-medium">Endpoint</th>
-            <th className="py-2 pr-4 font-medium">Price</th>
-            <th className="py-2 font-medium">AI verdict</th>
+          <tr className="border-b border-border text-left text-muted-foreground">
+            <th className="py-2.5 pr-4 font-semibold">Endpoint</th>
+            <th className="py-2.5 pr-4 font-semibold">Price</th>
+            <th className="py-2.5 font-semibold">AI verdict</th>
           </tr>
         </thead>
-        <tbody className="text-neutral-300">
+        <tbody className="divide-y divide-border/60 text-foreground">
           {PRICE_ROWS.map((row) => (
-            <tr key={row.path} className="border-b border-white/5">
-              <td className="py-2 pr-4">
-                <code className="text-neutral-100">{row.path}</code>
+            <tr key={row.path}>
+              <td className="py-2.5 pr-4">
+                <code className="font-mono text-sm text-foreground">{row.path}</code>
               </td>
-              <td className="py-2 pr-4">{row.price}</td>
-              <td className="py-2 text-neutral-500">
+              <td className="py-2.5 pr-4 font-medium">{row.price}</td>
+              <td className="py-2.5 text-muted-foreground">
                 {row.ai ? 'yes' : 'no'}
               </td>
             </tr>
@@ -247,27 +248,22 @@ const PAYMENT_REQUIRED_SHAPE = `{
   }
 }`;
 
-// The docs page keeps its original (pre-redesign) visual system for now -
-// only the main page has been rebuilt on shadcn/ui. Scoping it with `dark`
-// lets it keep rendering on the dark background via the new design
-// tokens' dark palette instead of clashing with the new light default body,
-// while the header stays visually consistent with the rest of the app.
 export default function DocsPage() {
   return (
-    <div className="dark min-h-screen bg-background text-foreground">
+    <div className="flex min-h-screen flex-col bg-background text-foreground">
       <SiteHeader />
-      <main className="mx-auto max-w-3xl px-6 py-16">
-        <h1 className="text-3xl font-semibold tracking-tight">
+      <main className="mx-auto w-full max-w-4xl flex-1 px-4 py-12 sm:px-6 sm:py-16">
+        <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
           API reference
         </h1>
-        <p className="mt-3 text-sm leading-relaxed text-neutral-400">
+        <p className="mt-3 text-sm leading-relaxed text-muted-foreground sm:text-base">
           Eight paid endpoints - four category checks, three AI bundles, and
           compare - plus two free GET endpoints. Paid endpoints are gated by{' '}
           <a
             href="https://x402.org"
             target="_blank"
             rel="noreferrer"
-            className="text-emerald-400 hover:underline"
+            className="text-primary underline-offset-4 hover:underline"
           >
             x402
           </a>
@@ -312,17 +308,17 @@ export default function DocsPage() {
         <Endpoint method="POST" path="/v1/validate/ai" paid>
           <p>
             Runs every category, then returns an AI-forward report: the{' '}
-            <code className="text-neutral-300">verdict</code> object (
-            <code className="text-neutral-300">recommendation</code>,{' '}
-            <code className="text-neutral-300">executiveSummary</code>,{' '}
-            <code className="text-neutral-300">insights</code>,{' '}
-            <code className="text-neutral-300">suggestions</code>,{' '}
-            <code className="text-neutral-300">opportunities</code>,{' '}
-            <code className="text-neutral-300">riskFlags</code>,{' '}
-            <code className="text-neutral-300">categoryNarrative</code>)
-            appears before <code className="text-neutral-300">summary</code>{' '}
+            <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-xs text-foreground">verdict</code> object (
+            <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-xs text-foreground">recommendation</code>,{' '}
+            <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-xs text-foreground">executiveSummary</code>,{' '}
+            <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-xs text-foreground">insights</code>,{' '}
+            <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-xs text-foreground">suggestions</code>,{' '}
+            <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-xs text-foreground">opportunities</code>,{' '}
+            <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-xs text-foreground">riskFlags</code>,{' '}
+            <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-xs text-foreground">categoryNarrative</code>)
+            appears before <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-xs text-foreground">summary</code>{' '}
             in the response. See{' '}
-            <a href="#ai-forward-shape" className="text-emerald-400 hover:underline">
+            <a href="#ai-forward-shape" className="text-primary underline-offset-4 hover:underline">
               response shape
             </a>{' '}
             below.
@@ -333,11 +329,11 @@ export default function DocsPage() {
         <Endpoint method="POST" path="/v1/validate/compare" paid>
           <p>
             Runs the full pipeline against 2-5{' '}
-            <code className="text-neutral-300">targets</code> in parallel, no
+            <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-xs text-foreground">targets</code> in parallel, no
             AI, and returns them ranked by overall score. One failing target
             never fails the others - it&apos;s reported under{' '}
-            <code className="text-neutral-300">failed</code> instead.
-            Persists a <code className="text-neutral-300">Comparison</code>{' '}
+            <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-xs text-foreground">failed</code> instead.
+            Persists a <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-xs text-foreground">Comparison</code>{' '}
             row you can retrieve later by id.
           </p>
           <CodeBlock>{COMPARE_REQUEST}</CodeBlock>
@@ -347,10 +343,10 @@ export default function DocsPage() {
           <p>
             Security and trust checks with AI analysis - includes a light
             crawl of the privacy policy, terms, and contact pages (see{' '}
-            <code className="text-neutral-300">trust</code> above), so it&apos;s
+            <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-xs text-foreground">trust</code> above), so it&apos;s
             not purely network-level. Scores-first response shape, with{' '}
-            <code className="text-neutral-300">summary.executiveSummary</code>{' '}
-            mirrored from <code className="text-neutral-300">verdict</code>{' '}
+            <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-xs text-foreground">summary.executiveSummary</code>{' '}
+            mirrored from <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-xs text-foreground">verdict</code>{' '}
             for backward compatibility.
           </p>
           <CodeBlock>{QUICK_REQUEST}</CodeBlock>
@@ -359,7 +355,7 @@ export default function DocsPage() {
         <Endpoint method="POST" path="/v1/validate/full" paid>
           <p>
             Every category with AI analysis - the complete report. Same
-            scores-first shape as <code className="text-neutral-300">quick</code>.
+            scores-first shape as <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-xs text-foreground">quick</code>.
           </p>
           <CodeBlock>{FULL_REQUEST}</CodeBlock>
         </Endpoint>
@@ -367,18 +363,18 @@ export default function DocsPage() {
         <Endpoint method="GET" path="/v1/validate/:analysisId" paid={false}>
           <p>
             Retrieves a previously generated report by the{' '}
-            <code className="text-neutral-300">analysisId</code> any of the
+            <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-xs text-foreground">analysisId</code> any of the
             single-target endpoints above returns. No payment required.
           </p>
           <CodeBlock>{GET_REQUEST}</CodeBlock>
           <p>
-            Returns <code className="text-neutral-300">200</code> with the
-            stored report once <code className="text-neutral-300">completed</code>{' '}
-            or <code className="text-neutral-300">partial</code>:
+            Returns <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-xs text-foreground">200</code> with the
+            stored report once <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-xs text-foreground">completed</code>{' '}
+            or <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-xs text-foreground">partial</code>:
           </p>
           <CodeBlock>{PENDING_SHAPE}</CodeBlock>
           <p>
-            or <code className="text-neutral-300">404</code> if the id
+            or <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-xs text-foreground">404</code> if the id
             doesn&apos;t exist:
           </p>
           <CodeBlock>{NOT_FOUND_SHAPE}</CodeBlock>
@@ -387,40 +383,40 @@ export default function DocsPage() {
         <Endpoint method="GET" path="/v1/validate/compare/:comparisonId" paid={false}>
           <p>
             Retrieves a previously generated comparison by the{' '}
-            <code className="text-neutral-300">comparisonId</code> a{' '}
-            <code className="text-neutral-300">compare</code> call returns.
+            <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-xs text-foreground">comparisonId</code> a{' '}
+            <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-xs text-foreground">compare</code> call returns.
             No payment required.
           </p>
           <CodeBlock>{GET_COMPARE_REQUEST}</CodeBlock>
           <CodeBlock>{GET_COMPARE_RESPONSE_SHAPE}</CodeBlock>
           <p>
-            or <code className="text-neutral-300">404</code> if the id
+            or <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-xs text-foreground">404</code> if the id
             doesn&apos;t exist:
           </p>
           <CodeBlock>{COMPARISON_NOT_FOUND_SHAPE}</CodeBlock>
         </Endpoint>
 
-        <section className="border-t border-white/10 py-10">
+        <section className="border-t border-border py-10">
           <h2 className="text-xl font-semibold tracking-tight">
             Response shape
           </h2>
-          <p className="mt-3 text-sm leading-relaxed text-neutral-400">
+          <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
             security, trust, web, engineering, quick, and full all share this
-            shape. <code className="text-neutral-300">verdict</code> is only
+            shape. <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-xs text-foreground">verdict</code> is only
             present on AI-enabled tiers (
-            <code className="text-neutral-300">ai</code>,{' '}
-            <code className="text-neutral-300">quick</code>,{' '}
-            <code className="text-neutral-300">full</code>) - the others omit
+            <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-xs text-foreground">ai</code>,{' '}
+            <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-xs text-foreground">quick</code>,{' '}
+            <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-xs text-foreground">full</code>) - the others omit
             it entirely and make no call to the AI layer at all.{' '}
-            <code className="text-neutral-300">recommendation</code> is
+            <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-xs text-foreground">recommendation</code> is
             always derived deterministically from the overall score (
-            <code className="text-neutral-300">&gt;=70</code> integrate,{' '}
-            <code className="text-neutral-300">40-69</code> caution,{' '}
-            <code className="text-neutral-300">&lt;40</code> avoid) - the AI
+            <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-xs text-foreground">&gt;=70</code> integrate,{' '}
+            <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-xs text-foreground">40-69</code> caution,{' '}
+            <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-xs text-foreground">&lt;40</code> avoid) - the AI
             never invents or overrides it, only writes prose around it. If
             Groq is unavailable, the prose fields come back{' '}
-            <code className="text-neutral-300">null</code> but{' '}
-            <code className="text-neutral-300">recommendation</code> and the
+            <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-xs text-foreground">null</code> but{' '}
+            <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-xs text-foreground">recommendation</code> and the
             full deterministic scores are still returned.
           </p>
           <div className="mt-4">
@@ -433,9 +429,9 @@ export default function DocsPage() {
           >
             AI-forward shape (ai endpoint only)
           </h3>
-          <p className="mt-3 text-sm leading-relaxed text-neutral-400">
-            Same fields, reordered so <code className="text-neutral-300">verdict</code>{' '}
-            comes before <code className="text-neutral-300">summary</code> -
+          <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
+            Same fields, reordered so <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-xs text-foreground">verdict</code>{' '}
+            comes before <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-xs text-foreground">summary</code> -
             the AI content is the primary output, not an addendum.
           </p>
           <div className="mt-4">
@@ -445,10 +441,10 @@ export default function DocsPage() {
           <h3 className="mt-8 text-base font-semibold tracking-tight">
             Compare shape
           </h3>
-          <p className="mt-3 text-sm leading-relaxed text-neutral-400">
-            <code className="text-neutral-300">results</code> holds a full
+          <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
+            <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-xs text-foreground">results</code> holds a full
             report per target (the same shape above, no{' '}
-            <code className="text-neutral-300">verdict</code> - compare never
+            <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-xs text-foreground">verdict</code> - compare never
             runs AI), in ranked order.
           </p>
           <div className="mt-4">
@@ -456,61 +452,59 @@ export default function DocsPage() {
           </div>
         </section>
 
-        <section className="border-t border-white/10 py-10">
+        <section className="border-t border-border py-10">
           <h2 className="text-xl font-semibold tracking-tight">
             Paying with x402
           </h2>
-          <div className="mt-3 space-y-3 text-sm leading-relaxed text-neutral-400">
+          <div className="mt-3 space-y-3 text-sm leading-relaxed text-muted-foreground">
             <p>
               Every paid endpoint above is gated by the{' '}
               <a
                 href="https://x402.org"
                 target="_blank"
                 rel="noreferrer"
-                className="text-emerald-400 hover:underline"
+                className="text-primary underline-offset-4 hover:underline"
               >
                 x402
               </a>{' '}
               payment protocol. Call it without a{' '}
-              <code className="text-neutral-300">PAYMENT-SIGNATURE</code>{' '}
+              <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-xs text-foreground">PAYMENT-SIGNATURE</code>{' '}
               header and you get back{' '}
-              <code className="text-neutral-300">402</code> with the exact
+              <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-xs text-foreground">402</code> with the exact
               payment requirements to satisfy, both in the JSON body and on a{' '}
-              <code className="text-neutral-300">PAYMENT-REQUIRED</code>{' '}
+              <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-xs text-foreground">PAYMENT-REQUIRED</code>{' '}
               response header (what spec-compliant x402 clients actually read
-              from). <code className="text-neutral-300">amount</code> matches
+              from). <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-xs text-foreground">amount</code> matches
               that endpoint&apos;s price from the table above - this example
-              shows <code className="text-neutral-300">security</code>&apos;s:
+              shows <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-xs text-foreground">security</code>&apos;s:
             </p>
             <CodeBlock>{PAYMENT_REQUIRED_SHAPE}</CodeBlock>
             <p>
               Sign and broadcast that payment, then retry the same request
               with the resulting token in{' '}
-              <code className="text-neutral-300">PAYMENT-SIGNATURE</code>. AI
+              <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-xs text-foreground">PAYMENT-SIGNATURE</code>. AI
               agents don&apos;t need to do this by hand -{' '}
-              <code className="text-neutral-300">@x402/axios</code> and{' '}
-              <code className="text-neutral-300">@x402/fetch</code> intercept
+              <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-xs text-foreground">@x402/axios</code> and{' '}
+              <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-xs text-foreground">@x402/fetch</code> intercept
               the 402, pay, and retry automatically.
             </p>
           </div>
         </section>
 
-        <section className="border-t border-white/10 py-10">
+        <section className="border-t border-border py-10">
           <h2 className="text-xl font-semibold tracking-tight">Discovery</h2>
-          <p className="mt-3 text-sm leading-relaxed text-neutral-400">
+          <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
             Every endpoint above is individually listed, with its own price
             and description, at{' '}
-            <code className="text-neutral-300">/.well-known/x402</code> - the
+            <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-xs text-foreground">/.well-known/x402</code> - the
             manifest x402 Bazaar crawlers read without making any request or
             payment. Agent-oriented docs are also available at{' '}
-            <code className="text-neutral-300">/llms.txt</code> and{' '}
-            <code className="text-neutral-300">/agents.md</code>.
+            <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-xs text-foreground">/llms.txt</code> and{' '}
+            <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-xs text-foreground">/agents.md</code>.
           </p>
         </section>
       </main>
-      <footer className="border-t border-white/10 py-8 text-center text-xs text-neutral-600">
-        Validex - built for the Algorand x402 Global Challenge
-      </footer>
+      <SiteFooter />
     </div>
   );
 }
