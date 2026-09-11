@@ -60,4 +60,5 @@ export const envValidationSchema = Joi.object({
 
   // Redis
   REDIS_URL: Joi.string().required(),
+  REDIS_KEY_PREFIX: Joi.string().default('validex'),
 });

@@ -22,3 +22,13 @@ export function parseRedisUrl(redisUrl: string): RedisConnectionOptions {
     tls: parsed.protocol === 'rediss:',
   };
 }
+
+/**
+ * Both consumers of REDIS_KEY_PREFIX (cache-manager-redis-yet's `keyPrefix`
+ * and BullMQ's `prefix`) append their own `:` separator before the rest of
+ * the key, so a value already ending in one (e.g. "validex:", as documented
+ * in deploy/.env.example) would otherwise double up into "validex::...".
+ */
+export function normalizeRedisKeyPrefix(prefix: string): string {
+  return prefix.replace(/:+$/, '');
+}

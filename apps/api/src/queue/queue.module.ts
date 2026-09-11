@@ -2,7 +2,10 @@ import { Global, Module } from '@nestjs/common';
 import { BullModule } from '@nestjs/bullmq';
 import { ConfigService } from '@nestjs/config';
 import { VALIDATION_QUEUE } from './queue.constants';
-import { parseRedisUrl } from '@/config/redis-connection.util';
+import {
+  normalizeRedisKeyPrefix,
+  parseRedisUrl,
+} from '@/config/redis-connection.util';
 
 @Global()
 @Module({
@@ -13,8 +16,14 @@ import { parseRedisUrl } from '@/config/redis-connection.util';
         const { host, port, username, password, tls } = parseRedisUrl(
           configService.get<string>('REDIS_URL', { infer: true }) as string,
         );
+        const keyPrefix = normalizeRedisKeyPrefix(
+          configService.get<string>('REDIS_KEY_PREFIX', {
+            infer: true,
+          }) as string,
+        );
 
         return {
+          prefix: keyPrefix,
           connection: {
             host,
             port,

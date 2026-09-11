@@ -38,6 +38,7 @@ Thumbs.db
 # Git
 .git/
 .gitignore
+.github/
 
 # Tests & coverage
 coverage/
@@ -51,3 +52,7 @@ coverage/
 # Web app – not built in this Dockerfile, but package.json needed for workspace graph
 apps/web/**
 !apps/web/package.json
+
+# Render-specific / OCI deploy tooling – not part of the build context
+render.yaml
+deploy/

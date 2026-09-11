@@ -1,0 +1,16 @@
+services:
+  validex-api:
+    container_name: validex-api
+    image: ghcr.io/${IMAGE_OWNER}/${REPO_NAME}-api:${IMAGE_TAG}
+    restart: unless-stopped
+    env_file:
+      - .env
+    ports:
+      - "127.0.0.1:3003:3003"
+    shm_size: '256mb'
+    networks:
+      - alpha
+
+networks:
+  alpha:
+    external: true

@@ -1,0 +1,150 @@
+name: Deploy Production
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: {}
+
+concurrency:
+  group: production-deploy
+  cancel-in-progress: false
+
+env:
+  IMAGE_OWNER: devfreeguy
+  REPO_NAME: validex
+
+jobs:
+  verify:
+    name: Verify (apps/api)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.15.1
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      # Only apps/api and its (zero) internal workspace deps - apps/web is
+      # not part of this deploy and is skipped here on purpose.
+      - name: Install dependencies
+        run: pnpm install --filter api... --frozen-lockfile
+
+      - name: Lint
+        run: pnpm --filter api lint
+
+      - name: Build
+        run: pnpm --filter api build
+
+      - name: Test
+        run: pnpm --filter api test -- --passWithNoTests
+
+  build-and-push:
+    name: Build & push images
+    needs: verify
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    outputs:
+      image_tag: ${{ steps.tag.outputs.value }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Compute image tag
+        id: tag
+        run: echo "value=${GITHUB_SHA}" >> "$GITHUB_OUTPUT"
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+        with:
+          platforms: arm64
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # Both targets share the deps/builder stages, so they intentionally
+      # use the same (unscoped) gha cache namespace - building the migrator
+      # second is then mostly cache hits.
+      - name: Build & push API image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile
+          target: production
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ghcr.io/${{ env.IMAGE_OWNER }}/${{ env.REPO_NAME }}-api:${{ steps.tag.outputs.value }},ghcr.io/${{ env.IMAGE_OWNER }}/${{ env.REPO_NAME }}-api:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Build & push migrator image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile
+          target: migrator
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ghcr.io/${{ env.IMAGE_OWNER }}/${{ env.REPO_NAME }}-migrator:${{ steps.tag.outputs.value }},ghcr.io/${{ env.IMAGE_OWNER }}/${{ env.REPO_NAME }}-migrator:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Verify multi-arch manifests
+        run: |
+          set -euo pipefail
+          for image in \
+            "ghcr.io/${{ env.IMAGE_OWNER }}/${{ env.REPO_NAME }}-api:${{ steps.tag.outputs.value }}" \
+            "ghcr.io/${{ env.IMAGE_OWNER }}/${{ env.REPO_NAME }}-migrator:${{ steps.tag.outputs.value }}"; do
+            echo "==> Inspecting ${image}"
+            platforms=$(docker buildx imagetools inspect "${image}" --format '{{json .Manifest.Manifests}}' | jq -r '.[].platform | "\(.os)/\(.architecture)"')
+            echo "${platforms}"
+            echo "${platforms}" | grep -qx "linux/amd64" || { echo "!! Missing linux/amd64 for ${image}" >&2; exit 1; }
+            echo "${platforms}" | grep -qx "linux/arm64" || { echo "!! Missing linux/arm64 for ${image}" >&2; exit 1; }
+          done
+
+  deploy:
+    name: Deploy to OCI VM
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Sync deploy files
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_KEY }}
+          source: "deploy/compose.yml,deploy/scripts/"
+          target: "/opt/apps/validex"
+          strip_components: 1
+          overwrite: true
+
+      - name: Run deploy script
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_KEY }}
+          envs: IMAGE_OWNER,REPO_NAME,IMAGE_TAG,GHCR_USER,GHCR_TOKEN
+          script: |
+            chmod +x /opt/apps/validex/scripts/deploy.sh
+            /opt/apps/validex/scripts/deploy.sh
+        env:
+          IMAGE_OWNER: ${{ env.IMAGE_OWNER }}
+          REPO_NAME: ${{ env.REPO_NAME }}
+          IMAGE_TAG: ${{ needs.build-and-push.outputs.image_tag }}
+          GHCR_USER: ${{ secrets.GHCR_USER }}
+          GHCR_TOKEN: ${{ secrets.GHCR_TOKEN }}
