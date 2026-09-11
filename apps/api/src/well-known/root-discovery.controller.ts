@@ -856,28 +856,6 @@ Score   | Grade | Recommendation
               },
             },
           },
-          // GET stub exists in the controller purely so Fastify can match it
-          // for the Bazaar discovery crawler (see DISCOVERY_ROUTES in
-          // x402.constants.ts and the preHandler hook in main.ts). Not
-          // intended to return data - documented here so the OpenAPI consumer
-          // understands the 402 response a crawler would receive.
-          get: {
-            operationId: `discover${tier[0].toUpperCase()}${tier.slice(1)}`,
-            summary: `x402 Bazaar discovery probe for ${tier} endpoint`,
-            description:
-              'Exists for x402 Bazaar crawler compatibility only. Always returns 402. Use the POST method to run an analysis.',
-            tags: ['discovery'],
-            responses: {
-              '402': {
-                description: 'Payment required (x402 Bazaar discovery).',
-                content: {
-                  'application/json': {
-                    schema: { '$ref': '#/components/schemas/PaymentRequiredError' },
-                  },
-                },
-              },
-            },
-          },
         },
       ]),
     );

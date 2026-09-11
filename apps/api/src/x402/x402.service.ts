@@ -21,6 +21,7 @@ import {
   TIER_BAZAAR_META,
   TIER_PRICE_ATOMIC,
   TierKey,
+  X402_CHALLENGE_TAG,
 } from './x402.constants';
 
 const BAZAAR_SERVICE_NAME = 'Validex';
@@ -33,7 +34,7 @@ const BAZAAR_SERVICE_NAME = 'Validex';
 // falling back to our root page's OpenGraph tags / llms.txt / agent-card.json.
 const X402_MERCHANT_INFO = {
   name: BAZAAR_SERVICE_NAME,
-  categories: ['api', 'algorand', 'x402'],
+  categories: ['api', 'algorand', 'x402', 'startup-health', 'validation'],
 };
 
 export interface VerifyPaymentResult {
@@ -91,7 +92,10 @@ export class X402Service implements OnModuleInit {
         asset: this.algorandConfig.usdcAssetId,
         amount: TIER_PRICE_ATOMIC[tier],
       },
-      extra: { decimals: 6 },
+      extra: {
+        decimals: 6,
+        tag: X402_CHALLENGE_TAG,
+      },
     });
     return requirements;
   }
@@ -126,21 +130,92 @@ export class X402Service implements OnModuleInit {
                   items: { type: 'string' },
                   minItems: 2,
                   maxItems: 5,
+                  description:
+                    'Array of 2 to 5 bare domains or full URLs to compare.',
+                },
+                refresh: {
+                  type: 'boolean',
+                  default: false,
+                  description: 'Bypass validator result cache when true.',
                 },
               },
               required: ['targets'],
             },
-            output: { example: { success: true } },
+            output: {
+              example: {
+                success: true,
+                data: {
+                  meta: {
+                    comparisonId: 'cmp_01j8z9k3n8v5w6x7y8z9a0b1c2',
+                    generatedAt: '2026-09-12T00:00:00.000Z',
+                    targetCount: 2,
+                  },
+                  ranking: [
+                    {
+                      rank: 1,
+                      domain: 'stripe.com',
+                      score: 92,
+                      grade: 'A',
+                      confidence: 0.85,
+                      analysisId: 'sl_an_01j8z9k3n8v5w6x7y8z9a0b1c2',
+                    },
+                    {
+                      rank: 2,
+                      domain: 'github.com',
+                      score: 88,
+                      grade: 'B',
+                      confidence: 0.82,
+                      analysisId: 'sl_an_01j8z9k3n8v5w6x7y8z9a0b1c3',
+                    },
+                  ],
+                },
+              },
+            },
           })
         : declareDiscoveryExtension({
             bodyType: 'json',
             input: { target: 'stripe.com' },
             inputSchema: {
               type: 'object',
-              properties: { target: { type: 'string' } },
+              properties: {
+                target: {
+                  type: 'string',
+                  description:
+                    'Bare domain or full URL of the startup to validate (e.g. "stripe.com").',
+                },
+                refresh: {
+                  type: 'boolean',
+                  default: false,
+                  description: 'Bypass validator result cache when true.',
+                },
+              },
               required: ['target'],
             },
-            output: { example: { success: true } },
+            output: {
+              example: {
+                success: true,
+                data: {
+                  meta: {
+                    analysisId: 'sl_an_01j8z9k3n8v5w6x7y8z9a0b1c2',
+                    algorithmVersion: '1.0.0',
+                    generatedAt: '2026-09-12T00:00:00.000Z',
+                    cached: false,
+                    tier,
+                  },
+                  company: {
+                    domain: 'stripe.com',
+                    canonicalUrl: 'https://stripe.com',
+                    companyName: 'Stripe',
+                    githubRepo: 'stripe',
+                  },
+                  summary: {
+                    score: 92,
+                    grade: 'A',
+                    confidence: 0.85,
+                  },
+                },
+              },
+            },
           });
 
     const parsedUrl = new URL(resourceUrl);
@@ -175,6 +250,7 @@ export class X402Service implements OnModuleInit {
         serviceName: meta.serviceName,
         description: meta.description,
         tags: meta.tags,
+        iconUrl: `${origin}/apple-touch-icon.png`,
       },
       'Payment required',
       extensions,

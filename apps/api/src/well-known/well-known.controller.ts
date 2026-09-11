@@ -5,6 +5,7 @@ import {
   TIER_BAZAAR_META,
   TIER_PRICE_ATOMIC,
   TierKey,
+  X402_CHALLENGE_TAG,
 } from '@/x402/x402.constants';
 import {
   SERVICE_DESCRIPTION,
@@ -49,7 +50,7 @@ export class WellKnownController {
         amount: TIER_PRICE_ATOMIC[tier],
         payTo: this.algorandConfig.walletAddress,
         extra: {
-          tag: 'x402-global-challenge',
+          tag: X402_CHALLENGE_TAG,
         },
       })),
     };
@@ -87,7 +88,7 @@ export class WellKnownController {
         id: `validate-${tier}`,
         name: TIER_BAZAAR_META[tier].serviceName,
         description: TIER_SUMMARY[tier],
-        tags: ['x402', 'algorand', 'validation', 'x402-global-challenge'],
+        tags: ['x402', 'algorand', 'validation', X402_CHALLENGE_TAG],
         // inputSchema lets tool-calling agents construct valid requests
         // without consulting external documentation.
         inputSchema:

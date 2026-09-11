@@ -11,19 +11,15 @@ import type { FastifyReply, FastifyRequest } from 'fastify';
 import { AppModule } from './app.module';
 import { X402Service } from '@/x402/x402.service';
 import {
-  DISCOVERY_ROUTES,
   PAYMENT_HEADER,
   PROTECTED_ROUTES,
   type TierKey,
 } from '@/x402/x402.constants';
 
 /**
- * Shared by the real payment-gated routes and the x402 Bazaar discovery
- * GETs (see DISCOVERY_ROUTES) so there is exactly one place that builds
- * requirements, checks PAYMENT-SIGNATURE, verifies, and settles - never two copies
- * of the payment logic to keep in sync. `tier` always comes from a route
- * table, never from the request body, so this works identically whether
- * the caller sent a real POST or the crawler sent a bare GET.
+ * Enforces x402 payment requirements on protected routes: checks for PAYMENT-SIGNATURE,
+ * verifies payment with the facilitator, and settles before handler execution.
+ * If no payment header is present, returns 402 with PAYMENT-REQUIRED header and challenge body.
  */
 async function enforceX402Payment(
   x402Service: X402Service,
@@ -167,18 +163,12 @@ async function bootstrap(): Promise<void> {
   const x402Service = app.get(X402Service);
   const fastify = app.getHttpAdapter().getInstance();
 
-  // Keyed by both PROTECTED_ROUTES (the real paid POST routes) and
-  // DISCOVERY_ROUTES (their GET counterparts - see x402.constants.ts for
-  // why those exist). Nest's Fastify adapter already owns the instance's
-  // one-and-only not-found handler, so unlike the POST routes, the GET
-  // discovery routes only reach this hook because ValidateController
-  // registers real (intentionally unreachable) handlers for them - Fastify
-  // never runs `preHandler` for a route it hasn't matched.
+  // Keyed by PROTECTED_ROUTES (the real paid POST routes).
   fastify.addHook(
     'preHandler',
     async (request: FastifyRequest, reply: FastifyReply) => {
       const routeKey = `${request.method} ${request.url.split('?')[0]}`;
-      const tier = PROTECTED_ROUTES[routeKey] ?? DISCOVERY_ROUTES[routeKey];
+      const tier = PROTECTED_ROUTES[routeKey];
       if (!tier) return;
       await enforceX402Payment(x402Service, tier, request, reply);
     },

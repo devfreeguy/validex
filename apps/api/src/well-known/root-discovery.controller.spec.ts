@@ -260,11 +260,10 @@ describe('getOpenApi', () => {
     });
   });
 
-  it('should include Bazaar discovery GET stubs for all paid endpoints', () => {
+  it('should not include dummy GET stubs for paid endpoints', () => {
     tiers.forEach((tier) => {
       const path = spec.paths[`/v1/validate/${tier}`];
-      expect(path.get).toBeDefined();
-      expect(path.get.tags).toContain('discovery');
+      expect(path.get).toBeUndefined();
     });
   });
 

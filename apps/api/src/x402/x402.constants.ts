@@ -26,21 +26,7 @@ export const PROTECTED_ROUTES: Record<string, TierKey> = {
   'POST /v1/validate/full': 'full',
 };
 
-// The x402 Bazaar discovery crawler catalogs a resource by sending a bare
-// GET to its URL and checking whether it gets a 402 back - it never issues
-// the real POST. Our paid routes are POST-only, so without a GET-reachable
-// counterpart for each one, the crawler gets a 404 and can never list us.
-// ValidateController registers a real (intentionally unreachable) GET
-// handler for each of these paths purely so Fastify has a route to match;
-// the preHandler hook in main.ts is what actually turns the request into a
-// 402, using this table. Derived from PROTECTED_ROUTES (not hand-
-// duplicated) so a new paid POST route can't silently ship without a
-// discovery counterpart.
-export const DISCOVERY_ROUTES: Record<string, TierKey> = Object.fromEntries(
-  Object.entries(PROTECTED_ROUTES)
-    .filter(([routeKey]) => routeKey.startsWith('POST '))
-    .map(([routeKey, tier]) => [routeKey.replace(/^POST /, 'GET '), tier]),
-);
+export const X402_CHALLENGE_TAG = 'x402-global-challenge';
 
 // USDC has 6 decimal places - amounts are atomic units. Compare is priced
 // flat per call regardless of target count (2-5) - never multiplied.
@@ -62,7 +48,7 @@ export const PAYMENT_TIMEOUT_SECONDS = 300;
  * Single source of truth reused by both the 402 discovery declaration and
  * the /.well-known/* manifests (WellKnownController), so a tier's identity
  * only needs to change in one place. Every endpoint carries
- * "x402-global-challenge" per the competition requirement.
+ * X402_CHALLENGE_TAG per the Algorand Global Challenge requirement.
  */
 export const TIER_BAZAAR_META: Record<
   TierKey,
@@ -72,48 +58,48 @@ export const TIER_BAZAAR_META: Record<
     serviceName: 'Validex Security Check',
     description:
       'Audits SSL and TLS certificates, HTTP security headers such as HSTS and CSP, SPF, DMARC, MX email records, and DNS configuration.',
-    tags: ['x402-global-challenge', 'security', 'validation'],
+    tags: [X402_CHALLENGE_TAG, 'security', 'validation'],
   },
   trust: {
     serviceName: 'Validex Trust Check',
     description:
       'Evaluates HTTPS enforcement, domain registration age, WHOIS records, privacy policy, and terms of service documentation.',
-    tags: ['x402-global-challenge', 'trust', 'validation'],
+    tags: [X402_CHALLENGE_TAG, 'trust', 'validation'],
   },
   web: {
     serviceName: 'Validex Web Presence Check',
     description:
       'Inspects online presence including pricing transparency, developer documentation, engineering blog, careers page, and contact channels.',
-    tags: ['x402-global-challenge', 'web', 'validation'],
+    tags: [X402_CHALLENGE_TAG, 'web', 'validation'],
   },
   engineering: {
     serviceName: 'Validex Engineering Check',
     description:
       'Analyzes public GitHub repository activity, commit frequency, contributor diversity, release cadence, and OSV known vulnerabilities.',
-    tags: ['x402-global-challenge', 'engineering', 'validation'],
+    tags: [X402_CHALLENGE_TAG, 'engineering', 'validation'],
   },
   ai: {
     serviceName: 'Validex AI Analysis',
     description:
       'Executes full multi-category validation with an AI-generated startup health verdict, risk factor analysis, and integration recommendations.',
-    tags: ['x402-global-challenge', 'ai', 'validation', 'startup-health'],
+    tags: [X402_CHALLENGE_TAG, 'ai', 'validation', 'startup-health'],
   },
   compare: {
     serviceName: 'Validex Compare',
     description:
       'Performs comparative analysis and health ranking across 2 to 5 startup domains with relative scoring across all categories.',
-    tags: ['x402-global-challenge', 'compare', 'validation'],
+    tags: [X402_CHALLENGE_TAG, 'compare', 'validation'],
   },
   quick: {
     serviceName: 'Validex Quick Validation',
     description:
       'Performs fast-path network connectivity, TLS certificate, security header, and domain trust validation combined with an AI summary.',
-    tags: ['x402-global-challenge', 'validation', 'startup-health'],
+    tags: [X402_CHALLENGE_TAG, 'validation', 'startup-health'],
   },
   full: {
     serviceName: 'Validex Full Validation',
     description:
       'Conducts a deep audit across all six signal categories including security, trust, web, and engineering with full evidence and AI interpretation.',
-    tags: ['x402-global-challenge', 'validation', 'startup-health'],
+    tags: [X402_CHALLENGE_TAG, 'validation', 'startup-health'],
   },
 };
