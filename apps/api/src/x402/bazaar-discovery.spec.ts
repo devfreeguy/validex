@@ -53,8 +53,9 @@ describe('Bazaar Discovery Extension & Challenge Tag Validation', () => {
           },
         ],
         extensions: ['bazaar'],
+        signers: {},
       }),
-    });
+    } as any);
     server.registerExtension(bazaarResourceServerExtension);
     const mockScheme = {
       scheme: 'exact',
