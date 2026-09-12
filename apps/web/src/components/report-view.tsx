@@ -25,6 +25,8 @@ import {
 import { cn } from '@/lib/utils';
 import type { AnalysisReport, Recommendation } from '@/lib/report-types';
 
+import { ExportButton } from '@/components/export-button';
+
 type ScoreVariant = 'success' | 'warning' | 'destructive' | 'muted';
 
 function scoreVariant(score: number | null): ScoreVariant {
@@ -75,6 +77,8 @@ export function ReportView({ report }: { report: AnalysisReport }) {
 
   return (
     <div className="space-y-6">
+
+      bdfosdfopbsdbovjbsdfvs
       {/* Summary */}
       <Card>
         <CardContent className="pt-6">
@@ -92,18 +96,21 @@ export function ReportView({ report }: { report: AnalysisReport }) {
                 </Badge>
               ) : null}
             </div>
-            <div className="text-right">
-              <div
-                className={cn(
-                  'text-4xl font-bold tabular-nums',
-                  SCORE_TEXT_CLASS[scoreVariant(report.summary.score)],
-                )}
-              >
-                {report.summary.score ?? '-'}
-              </div>
-              <div className="mt-1 text-sm text-muted-foreground">
-                Grade {report.summary.grade} · {report.summary.confidence}%
-                confidence
+            <div className="flex items-center gap-3">
+              <ExportButton report={report} />
+              <div className="text-right">
+                <div
+                  className={cn(
+                    'text-4xl font-bold tabular-nums',
+                    SCORE_TEXT_CLASS[scoreVariant(report.summary.score)],
+                  )}
+                >
+                  {report.summary.score ?? '-'}
+                </div>
+                <div className="mt-1 text-sm text-muted-foreground">
+                  Grade {report.summary.grade} · {report.summary.confidence}%
+                  confidence
+                </div>
               </div>
             </div>
           </div>

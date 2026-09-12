@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useWallet } from '@txnlab/use-wallet-react';
-import { Check, Copy, Loader2, LogOut, Wallet } from 'lucide-react';
+import { Check, Copy, Loader2, LogOut, ShieldCheck, Wallet } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -28,6 +28,7 @@ export function WalletConnect({ className }: WalletConnectProps = {}) {
   const { wallets, activeWallet, activeAddress, isReady } = useWallet();
   const [connecting, setConnecting] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   async function copyAddress(address: string) {
     try {
@@ -54,9 +55,19 @@ export function WalletConnect({ className }: WalletConnectProps = {}) {
             {truncate(activeAddress)}
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
+        <DropdownMenuContent align="end" className="w-64">
           <DropdownMenuLabel className="flex items-center justify-between gap-2">
-            <span>{activeWallet.metadata.name}</span>
+            <div className="flex items-center gap-2">
+              {activeWallet.metadata.icon ? (
+                /* eslint-disable-next-line @next/next/no-img-element */
+                <img
+                  src={activeWallet.metadata.icon}
+                  alt={activeWallet.metadata.name}
+                  className="h-4 w-4 rounded-sm object-contain"
+                />
+              ) : null}
+              <span>{activeWallet.metadata.name}</span>
+            </div>
             <Badge variant="muted" className="capitalize">
               {network}
             </Badge>
@@ -76,7 +87,7 @@ export function WalletConnect({ className }: WalletConnectProps = {}) {
           <DropdownMenuSeparator />
           <DropdownMenuItem
             onClick={() => void activeWallet.disconnect()}
-            className="text-destructive focus:text-destructive"
+            className="text-destructive focus:text-destructive cursor-pointer"
           >
             <LogOut className="h-4 w-4" />
             Disconnect
@@ -87,17 +98,19 @@ export function WalletConnect({ className }: WalletConnectProps = {}) {
   }
 
   return (
-    <DropdownMenu>
+    <DropdownMenu onOpenChange={() => setError(null)}>
       <DropdownMenuTrigger asChild>
         <Button className={cn("gap-2", className)}>
           <Wallet className="h-4 w-4" />
           Connect wallet
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
-        <DropdownMenuLabel>
-          Choose a wallet ·{' '}
-          <span className="capitalize text-foreground">{network}</span>
+      <DropdownMenuContent align="end" className="w-72">
+        <DropdownMenuLabel className="flex items-center justify-between gap-2 text-xs font-normal text-muted-foreground">
+          <span>Choose an Algorand wallet</span>
+          <Badge variant="muted" className="capitalize text-[10px]">
+            {network}
+          </Badge>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         {wallets.map((wallet) => (
@@ -107,20 +120,55 @@ export function WalletConnect({ className }: WalletConnectProps = {}) {
             onSelect={async (e) => {
               e.preventDefault();
               setConnecting(wallet.id);
+              setError(null);
               try {
-                await wallet.connect();
-                wallet.setActive();
+                const accounts = await wallet.connect();
+                if (accounts && accounts.length > 0) {
+                  wallet.setActive();
+                }
+              } catch (err: unknown) {
+                const msg = err instanceof Error ? err.message : 'Failed to connect wallet';
+                if (
+                  !msg.toLowerCase().includes('user rejected') &&
+                  !msg.toLowerCase().includes('cancelled') &&
+                  !msg.toLowerCase().includes('closed')
+                ) {
+                  setError(msg);
+                }
               } finally {
                 setConnecting(null);
               }
             }}
+            className="flex items-center justify-between py-2 cursor-pointer"
           >
-            {wallet.metadata.name}
+            <div className="flex items-center gap-2.5">
+              {wallet.metadata.icon ? (
+                /* eslint-disable-next-line @next/next/no-img-element */
+                <img
+                  src={wallet.metadata.icon}
+                  alt={wallet.metadata.name}
+                  className="h-4 w-4 rounded-sm object-contain"
+                />
+              ) : (
+                <Wallet className="h-4 w-4 text-muted-foreground" />
+              )}
+              <span className="font-medium text-sm">{wallet.metadata.name}</span>
+            </div>
             {connecting === wallet.id ? (
               <Loader2 className="ml-auto h-4 w-4 animate-spin text-muted-foreground" />
             ) : null}
           </DropdownMenuItem>
         ))}
+        {error ? (
+          <div className="mx-2 my-1 px-2.5 py-1.5 text-xs text-destructive bg-destructive/10 rounded-md">
+            {error}
+          </div>
+        ) : null}
+        <DropdownMenuSeparator />
+        <div className="flex items-center gap-2 px-2.5 py-2 text-[11px] leading-tight text-muted-foreground bg-muted/30 rounded-b-sm">
+          <ShieldCheck className="h-4 w-4 text-primary shrink-0" />
+          <span>Private keys & seed phrases are never shared with Validex.</span>
+        </div>
       </DropdownMenuContent>
     </DropdownMenu>
   );

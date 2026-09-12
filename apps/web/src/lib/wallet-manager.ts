@@ -1,6 +1,7 @@
 import { NetworkId, WalletManager } from '@txnlab/use-wallet-react';
 import { pera } from '@txnlab/use-wallet-pera';
-import { mnemonic } from '@txnlab/use-wallet-mnemonic';
+import { defly } from '@txnlab/use-wallet-defly';
+import { lute } from '@txnlab/use-wallet-lute';
 
 // Must match the API's own NETWORK - the wallet has to sign transactions
 // for the same Algorand network the server's x402 payment requirements
@@ -12,10 +13,7 @@ export const network: 'testnet' | 'mainnet' =
 const defaultNetwork =
   network === 'mainnet' ? NetworkId.MAINNET : NetworkId.TESTNET;
 
-// Mnemonic wallet is testnet-only (enforced by the adapter itself) - it
-// exists purely so this demo can be tried without a mobile wallet app, so
-// it's only offered when the app itself is pointed at testnet.
 export const walletManager = new WalletManager({
-  wallets: network === 'mainnet' ? [pera()] : [pera(), mnemonic()],
+  wallets: [pera(), defly(), lute()],
   defaultNetwork,
 });
