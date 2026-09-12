@@ -37,6 +37,20 @@ const X402_MERCHANT_INFO = {
   categories: ['api', 'algorand', 'x402', 'startup-health', 'validation'],
 };
 
+const X402_MERCHANT_SCHEMA = {
+  $schema: 'https://json-schema.org/draft/2020-12/schema',
+  type: 'object',
+  properties: {
+    name: { type: 'string' },
+    website: { type: 'string', format: 'uri' },
+    logo: { type: 'string', format: 'uri' },
+    categories: {
+      type: 'array',
+      items: { type: 'string' },
+    },
+  },
+};
+
 export interface VerifyPaymentResult {
   valid: boolean;
   reason?: string;
@@ -240,6 +254,7 @@ export class X402Service implements OnModuleInit {
           website: origin,
           logo: `${origin}/apple-touch-icon.png`,
         },
+        schema: X402_MERCHANT_SCHEMA,
       },
     };
 

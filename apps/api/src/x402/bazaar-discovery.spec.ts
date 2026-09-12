@@ -151,6 +151,26 @@ describe('Bazaar Discovery Extension & Challenge Tag Validation', () => {
         expect(merchant.info.website).toBe('https://api.validex.space');
         expect(merchant.info.logo).toBe('https://api.validex.space/apple-touch-icon.png');
         expect(merchant.info.categories).toContain('validation');
+
+        // 6. Merchant schema verification (x402 v2 spec: info + schema)
+        expect(merchant.schema).toBeDefined();
+        expect(merchant.schema.$schema).toBe(
+          'https://json-schema.org/draft/2020-12/schema',
+        );
+        expect(merchant.schema.type).toBe('object');
+        expect(merchant.schema.properties.name).toEqual({ type: 'string' });
+        expect(merchant.schema.properties.website).toEqual({
+          type: 'string',
+          format: 'uri',
+        });
+        expect(merchant.schema.properties.logo).toEqual({
+          type: 'string',
+          format: 'uri',
+        });
+        expect(merchant.schema.properties.categories).toEqual({
+          type: 'array',
+          items: { type: 'string' },
+        });
       });
     });
   });
