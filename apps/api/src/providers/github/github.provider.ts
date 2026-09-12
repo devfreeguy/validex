@@ -293,6 +293,32 @@ export class GithubProvider {
     );
   }
 
+  async getOrgTopRepository(org: string): Promise<GithubRepo | null> {
+    return this.withCache(
+      this.cacheKey(org, '_top', 'top_repository'),
+      async () => {
+        let response = await this.rawRequest<RawGithubRepo[]>(
+          `/orgs/${org}/repos`,
+          { sort: 'pushed', direction: 'desc', per_page: 10 },
+        );
+        if (!response || response.status !== 200 || !Array.isArray(response.data) || response.data.length === 0) {
+          response = await this.rawRequest<RawGithubRepo[]>(
+            `/users/${org}/repos`,
+            { sort: 'pushed', direction: 'desc', per_page: 10 },
+          );
+        }
+        if (!response || response.status !== 200 || !Array.isArray(response.data) || response.data.length === 0) {
+          return null;
+        }
+        const nonForks = response.data.filter((r) => !r.fork);
+        const candidates = nonForks.length > 0 ? nonForks : response.data;
+        candidates.sort((a, b) => b.stargazers_count - a.stargazers_count);
+        return mapRepo(candidates[0]);
+      },
+      reviveRepo,
+    );
+  }
+
   private cacheKey(owner: string, repo: string, endpoint: string): string {
     return `github:${owner}:${repo}:${endpoint}`;
   }
@@ -322,15 +348,20 @@ export class GithubProvider {
   ): Promise<{ status: number; data: T | null } | null> {
     try {
       const token = this.configService.get<string>('GITHUB_TOKEN');
+      const headers: Record<string, string> = {
+        Accept: 'application/vnd.github+json',
+        'X-GitHub-Api-Version': '2022-11-28',
+        'User-Agent': 'Validex-API/1.0',
+      };
+      if (token && token.trim().length > 0) {
+        headers.Authorization = `Bearer ${token.trim()}`;
+      }
+
       const response = await axios.get<T>(`${GITHUB_API_BASE}${path}`, {
         params,
         timeout: REQUEST_TIMEOUT_MS,
         validateStatus: () => true,
-        headers: {
-          Authorization: `Bearer ${token}`,
-          Accept: 'application/vnd.github+json',
-          'X-GitHub-Api-Version': '2022-11-28',
-        },
+        headers,
       });
 
       this.warnIfRateLimitLow(response.headers);
