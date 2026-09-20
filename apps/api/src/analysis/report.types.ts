@@ -68,6 +68,26 @@ export interface ComparisonFailedEntry {
   error: string;
 }
 
+export interface ComparisonLesson {
+  domain: string;
+  recommendations: string[];
+}
+
+/**
+ * `winnerDomain` is always deterministic - it's ranking[0].domain, computed
+ * by ValidateService.compare from the scores, never decided by the AI (same
+ * principle as AnalysisVerdict.recommendation). The AI only narrates why,
+ * and turns the winner's strengths / the others' weaknesses into concrete
+ * per-domain lessons. All AI fields are null when Groq is unavailable/fails
+ * or there were fewer than two scored results to compare.
+ */
+export interface ComparisonVerdict {
+  winnerDomain: string;
+  executiveSummary: string | null;
+  winningFactors: string[] | null;
+  lessons: ComparisonLesson[] | null;
+}
+
 export interface ComparisonReport {
   meta: {
     comparisonId: string;
@@ -77,4 +97,6 @@ export interface ComparisonReport {
   ranking: ComparisonRankingEntry[];
   results: AnalysisReport[];
   failed: ComparisonFailedEntry[];
+  /** Present only when there were >= 2 scored results to compare. */
+  verdict?: ComparisonVerdict;
 }

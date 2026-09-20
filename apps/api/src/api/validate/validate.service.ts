@@ -13,6 +13,7 @@ import {
   ComparisonFailedEntry,
   ComparisonRankingEntry,
   ComparisonReport,
+  ComparisonVerdict,
   Recommendation,
 } from '@/analysis/report.types';
 import type { Analysis, Comparison } from '@/generated/prisma/client';
@@ -157,6 +158,15 @@ export class ValidateService {
       ranking,
     });
 
+    // A comparison verdict needs at least two scored results to say
+    // anything - a single survivor (or none) has nothing to be measured
+    // against, so the deterministic ranking/category scores speak for
+    // themselves and no Groq call is made.
+    const verdict =
+      ranked.length >= 2
+        ? await this.buildComparisonVerdict(ranked)
+        : undefined;
+
     return {
       meta: {
         comparisonId,
@@ -166,6 +176,53 @@ export class ValidateService {
       ranking,
       results: ranked,
       failed,
+      ...(verdict ? { verdict } : {}),
+    };
+  }
+
+  /**
+   * winnerDomain is always ranked[0] - deterministic, never decided by the
+   * AI (same principle as deriveRecommendation for single reports). The AI
+   * only narrates why and turns that into concrete lessons for the rest.
+   */
+  private async buildComparisonVerdict(
+    ranked: AnalysisReport[],
+  ): Promise<ComparisonVerdict> {
+    const winnerDomain = ranked[0].company.domain;
+    const knownDomains = new Set(ranked.map((r) => r.company.domain));
+
+    const aiVerdict = await this.aiService.generateComparisonVerdict({
+      winnerDomain,
+      targets: ranked.map((r) => ({
+        domain: r.company.domain,
+        overallScore: r.summary.score,
+        grade: r.summary.grade,
+        categories: Object.fromEntries(
+          Object.entries(r.categories)
+            .filter(([, v]) => v.score !== null)
+            .map(([category, v]) => [
+              category,
+              { score: v.score, confidence: v.confidence },
+            ]),
+        ),
+        strengths: r.strengths,
+        weaknesses: r.weaknesses,
+      })),
+    });
+
+    // Defensive: only keep lessons addressed to a domain that was actually
+    // compared, and never let a hallucinated lesson target the winner.
+    const lessons =
+      aiVerdict.lessons?.filter(
+        (lesson) =>
+          knownDomains.has(lesson.domain) && lesson.domain !== winnerDomain,
+      ) ?? null;
+
+    return {
+      winnerDomain,
+      executiveSummary: aiVerdict.executiveSummary,
+      winningFactors: aiVerdict.winningFactors,
+      lessons: lessons && lessons.length > 0 ? lessons : null,
     };
   }
 

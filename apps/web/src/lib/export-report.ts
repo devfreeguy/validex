@@ -1,27 +1,18 @@
-import type { AnalysisReport } from '@/lib/report-types';
+import type { AnalysisReport, ComparisonReport } from '@/lib/report-types';
 
-/**
- * Serializes an AnalysisReport object to JSON and triggers a browser file download.
- *
- * @param report The analysis report to export.
- * @returns boolean true if download was triggered successfully, false otherwise.
- */
-export function exportReport(report: AnalysisReport): boolean {
-  if (!report || typeof report !== 'object') {
-    return false;
-  }
+function sanitize(value: string): string {
+  return value
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9.-]/g, '_');
+}
 
+function downloadJson(data: unknown, filename: string): boolean {
   try {
-    const rawDomain = report.company?.domain ?? 'report';
-    const sanitizedDomain = rawDomain
-      .toLowerCase()
-      .trim()
-      .replace(/[^a-z0-9.-]/g, '_');
-    const dateStr = new Date().toISOString().slice(0, 10);
-    const filename = `validex-report-${sanitizedDomain}-${dateStr}.json`;
-
-    const jsonString = JSON.stringify(report, null, 2);
-    const blob = new Blob([jsonString], { type: 'application/json;charset=utf-8' });
+    const jsonString = JSON.stringify(data, null, 2);
+    const blob = new Blob([jsonString], {
+      type: 'application/json;charset=utf-8',
+    });
     const url = URL.createObjectURL(blob);
 
     const link = document.createElement('a');
@@ -34,7 +25,43 @@ export function exportReport(report: AnalysisReport): boolean {
     URL.revokeObjectURL(url);
     return true;
   } catch (err) {
-    console.error('Failed to export analysis report:', err);
+    console.error('Failed to export JSON:', err);
     return false;
   }
+}
+
+/**
+ * Serializes an AnalysisReport object to JSON and triggers a browser file download.
+ *
+ * @param report The analysis report to export.
+ * @returns boolean true if download was triggered successfully, false otherwise.
+ */
+export function exportReport(report: AnalysisReport): boolean {
+  if (!report || typeof report !== 'object') {
+    return false;
+  }
+
+  const domain = sanitize(report.company?.domain ?? 'report');
+  const dateStr = new Date().toISOString().slice(0, 10);
+  return downloadJson(report, `validex-report-${domain}-${dateStr}.json`);
+}
+
+/**
+ * Serializes a ComparisonReport (ranking, category scores, full per-domain
+ * reports, and the AI verdict when present) to JSON and triggers a browser
+ * file download.
+ *
+ * @param comparison The comparison report to export.
+ * @returns boolean true if download was triggered successfully, false otherwise.
+ */
+export function exportComparison(comparison: ComparisonReport): boolean {
+  if (!comparison || typeof comparison !== 'object') {
+    return false;
+  }
+
+  const domains =
+    comparison.ranking.map((entry) => sanitize(entry.domain)).join('-vs-') ||
+    'domains';
+  const dateStr = new Date().toISOString().slice(0, 10);
+  return downloadJson(comparison, `validex-compare-${domains}-${dateStr}.json`);
 }

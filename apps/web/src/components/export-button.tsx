@@ -4,30 +4,32 @@ import { useState } from 'react';
 import { Check, Download, Loader2 } from 'lucide-react';
 import { Button, type ButtonProps } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import type { AnalysisReport } from '@/lib/report-types';
-import { exportReport } from '@/lib/export-report';
 
-interface ExportButtonProps extends Omit<ButtonProps, 'onClick'> {
-  report: AnalysisReport | null;
+interface ExportButtonProps<T> extends Omit<ButtonProps, 'onClick'> {
+  data: T | null;
+  exportFn: (data: T) => boolean;
+  label?: string;
 }
 
-export function ExportButton({
-  report,
+export function ExportButton<T>({
+  data,
+  exportFn,
+  label = 'Export',
   className,
   variant = 'outline',
   size = 'sm',
   disabled,
   ...props
-}: ExportButtonProps) {
+}: ExportButtonProps<T>) {
   const [exporting, setExporting] = useState(false);
   const [exported, setExported] = useState(false);
 
   const handleExport = () => {
-    if (!report || exporting) return;
+    if (!data || exporting) return;
 
     setExporting(true);
     setTimeout(() => {
-      const success = exportReport(report);
+      const success = exportFn(data);
       setExporting(false);
       if (success) {
         setExported(true);
@@ -40,10 +42,10 @@ export function ExportButton({
     <Button
       variant={variant}
       size={size}
-      disabled={disabled || !report || exporting}
+      disabled={disabled || !data || exporting}
       onClick={handleExport}
       className={cn('gap-2 font-medium', className)}
-      title={report ? 'Export analysis report as JSON' : 'No report to export'}
+      title={data ? `${label} as JSON` : 'Nothing to export'}
       {...props}
     >
       {exporting ? (
@@ -53,7 +55,7 @@ export function ExportButton({
       ) : (
         <Download className="h-4 w-4" />
       )}
-      <span>{exported ? 'Exported' : 'Export'}</span>
+      <span>{exported ? 'Exported' : label}</span>
     </Button>
   );
 }

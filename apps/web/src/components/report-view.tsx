@@ -26,6 +26,7 @@ import { cn } from '@/lib/utils';
 import type { AnalysisReport, Recommendation } from '@/lib/report-types';
 
 import { ExportButton } from '@/components/export-button';
+import { exportReport } from '@/lib/export-report';
 
 type ScoreVariant = 'success' | 'warning' | 'destructive' | 'muted';
 
@@ -77,8 +78,6 @@ export function ReportView({ report }: { report: AnalysisReport }) {
 
   return (
     <div className="space-y-6">
-
-      bdfosdfopbsdbovjbsdfvs
       {/* Summary */}
       <Card>
         <CardContent className="pt-6">
@@ -97,7 +96,7 @@ export function ReportView({ report }: { report: AnalysisReport }) {
               ) : null}
             </div>
             <div className="flex items-center gap-3">
-              <ExportButton report={report} />
+              <ExportButton data={report} exportFn={exportReport} />
               <div className="text-right">
                 <div
                   className={cn(

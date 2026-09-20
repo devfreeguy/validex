@@ -73,3 +73,41 @@ export interface ApiEnvelope<T> {
   data: T;
   error?: string;
 }
+
+export interface ComparisonRankingEntry {
+  rank: number;
+  domain: string;
+  score: number | null;
+  grade: string;
+  confidence: number;
+  analysisId: string;
+}
+
+export interface ComparisonFailedEntry {
+  target: string;
+  error: string;
+}
+
+export interface ComparisonLesson {
+  domain: string;
+  recommendations: string[];
+}
+
+export interface ComparisonVerdict {
+  winnerDomain: string;
+  executiveSummary: string | null;
+  winningFactors: string[] | null;
+  lessons: ComparisonLesson[] | null;
+}
+
+export interface ComparisonReport {
+  meta: {
+    comparisonId: string;
+    generatedAt: string;
+    targetCount: number;
+  };
+  ranking: ComparisonRankingEntry[];
+  results: AnalysisReport[];
+  failed: ComparisonFailedEntry[];
+  verdict?: ComparisonVerdict;
+}

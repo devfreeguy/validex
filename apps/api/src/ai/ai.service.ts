@@ -34,6 +34,37 @@ const NULL_VERDICT: AIVerdict = {
   categoryNarrative: null,
 };
 
+export interface ComparisonVerdictPayload {
+  /** Deterministic, computed by the caller from scores - the AI writes
+   * around it, it never picks or contradicts the winner. */
+  winnerDomain: string;
+  targets: Array<{
+    domain: string;
+    overallScore: number | null;
+    grade: string;
+    categories: Record<string, { score: number | null; confidence: number }>;
+    strengths: string[];
+    weaknesses: string[];
+  }>;
+}
+
+export interface ComparisonLesson {
+  domain: string;
+  recommendations: string[];
+}
+
+export interface ComparisonAIVerdict {
+  executiveSummary: string | null;
+  winningFactors: string[] | null;
+  lessons: ComparisonLesson[] | null;
+}
+
+const NULL_COMPARISON_VERDICT: ComparisonAIVerdict = {
+  executiveSummary: null,
+  winningFactors: null,
+  lessons: null,
+};
+
 const GROQ_CHAT_COMPLETIONS_URL =
   'https://api.groq.com/openai/v1/chat/completions';
 const REQUEST_TIMEOUT_MS = 15_000;
@@ -51,6 +82,19 @@ const SYSTEM_PROMPT =
   'future performance. Describe only what the observable signals indicate. ' +
   'The "recommendation" field in the input is fixed and already decided - never contradict it, ' +
   'restate it as your own, or propose a different one; write around it.';
+
+const COMPARISON_SYSTEM_PROMPT =
+  'You are a technical analyst comparing multiple startups by their validation reports. ' +
+  'The winner is already determined by score and given as "winnerDomain" - never contradict it, ' +
+  'pick a different one, or include it as a lesson target. Respond with ONLY a single JSON object ' +
+  '(no prose, no markdown fences) with exactly these keys: ' +
+  '"executiveSummary" (a concise 3-5 sentence factual summary of how the targets compare and why the winner leads), ' +
+  '"winningFactors" (an array of 2-5 concise factual reasons the winner scored higher, grounded only in its given strengths/category scores), ' +
+  '"lessons" (an array with one object per NON-winning domain - never the winner - each shaped ' +
+  '{"domain": <must exactly match one of the given non-winning domains>, "recommendations": <array of 2-4 concrete, ' +
+  'actionable steps that domain could take to close the gap, each one grounded in an actual weakness of that domain ' +
+  'and/or an actual strength of the winner>}). ' +
+  'Be factual and direct. Do not invent information not present in the data. Do not speculate about future performance.';
 
 interface GroqChatCompletionResponse {
   choices?: Array<{ message?: { content?: string } }>;
@@ -134,6 +178,51 @@ function parseVerdict(content: string): AIVerdict | null {
   }
 }
 
+interface ParsedComparisonVerdictJson {
+  executiveSummary?: unknown;
+  winningFactors?: unknown;
+  lessons?: unknown;
+}
+
+function parseLessons(val: unknown): ComparisonLesson[] | null {
+  if (!Array.isArray(val)) return null;
+  const lessons = val
+    .filter(
+      (item): item is Record<string, unknown> =>
+        typeof item === 'object' && item !== null,
+    )
+    .map((item) => ({
+      domain: typeof item.domain === 'string' ? item.domain.trim() : '',
+      recommendations: parseStringArray(item.recommendations) ?? [],
+    }))
+    .filter(
+      (lesson) => lesson.domain.length > 0 && lesson.recommendations.length > 0,
+    );
+  return lessons.length > 0 ? lessons : null;
+}
+
+function parseComparisonVerdict(content: string): ComparisonAIVerdict | null {
+  try {
+    const parsed = JSON.parse(
+      stripCodeFence(content),
+    ) as ParsedComparisonVerdictJson;
+
+    const executiveSummary =
+      typeof parsed.executiveSummary === 'string' &&
+      parsed.executiveSummary.trim().length > 0
+        ? parsed.executiveSummary.trim()
+        : null;
+    const winningFactors = parseStringArray(parsed.winningFactors);
+    const lessons = parseLessons(parsed.lessons);
+
+    if (!executiveSummary && !winningFactors && !lessons) return null;
+
+    return { executiveSummary, winningFactors, lessons };
+  } catch {
+    return null;
+  }
+}
+
 /** Never throws - Groq being unavailable must never fail the main response. */
 @Injectable()
 export class AiService {
@@ -179,6 +268,51 @@ export class AiService {
     } catch (err) {
       this.logger.warn(`Groq verdict generation failed: ${String(err)}`);
       return NULL_VERDICT;
+    }
+  }
+
+  async generateComparisonVerdict(
+    payload: ComparisonVerdictPayload,
+  ): Promise<ComparisonAIVerdict> {
+    const apiKey = this.configService.get<string>('groq.apiKey');
+    const model = this.configService.get<string>('groq.model');
+    if (!apiKey) return NULL_COMPARISON_VERDICT;
+
+    try {
+      const response = await axios.post<GroqChatCompletionResponse>(
+        GROQ_CHAT_COMPLETIONS_URL,
+        {
+          model,
+          response_format: { type: 'json_object' },
+          messages: [
+            { role: 'system', content: COMPARISON_SYSTEM_PROMPT },
+            { role: 'user', content: JSON.stringify(payload) },
+          ],
+        },
+        {
+          timeout: REQUEST_TIMEOUT_MS,
+          validateStatus: () => true,
+          headers: {
+            Authorization: `Bearer ${apiKey}`,
+            'Content-Type': 'application/json',
+          },
+        },
+      );
+
+      if (response.status < 200 || response.status >= 300) {
+        this.logger.warn(`Groq API returned HTTP ${response.status}.`);
+        return NULL_COMPARISON_VERDICT;
+      }
+
+      const content = response.data.choices?.[0]?.message?.content;
+      if (!content) return NULL_COMPARISON_VERDICT;
+
+      return parseComparisonVerdict(content) ?? NULL_COMPARISON_VERDICT;
+    } catch (err) {
+      this.logger.warn(
+        `Groq comparison verdict generation failed: ${String(err)}`,
+      );
+      return NULL_COMPARISON_VERDICT;
     }
   }
 }
