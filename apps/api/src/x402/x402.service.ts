@@ -34,7 +34,7 @@ const BAZAAR_SERVICE_NAME = 'Validex';
 // falling back to our root page's OpenGraph tags / llms.txt / agent-card.json.
 const X402_MERCHANT_INFO = {
   name: BAZAAR_SERVICE_NAME,
-  categories: ['api', 'algorand', 'x402', 'startup-health', 'validation'],
+  categories: ['validation', 'startup-health', 'algorand', 'x402', 'api'],
 };
 
 const X402_MERCHANT_SCHEMA = {
